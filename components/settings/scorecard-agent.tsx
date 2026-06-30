@@ -1,0 +1,244 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Send, Sparkles, Save, RotateCcw, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type Message = { role: "user" | "assistant"; content: string };
+
+const OPENER_NEW: Message = {
+  role: "assistant",
+  content: "Let's build your MEDDPICC value narrative — this will help you and the Team Coach speak consistently about what your product actually delivers.\n\nStart simple: what does your product do, and who is the most natural first buyer?",
+};
+
+const OPENER_REVISIT: Message = {
+  role: "assistant",
+  content: "You have an existing value narrative. Let's see if it still holds.\n\nWhat's changed since you wrote it — your product definition, who you're targeting, what you've learned from deals won or lost, or how you're thinking about competition?\n\nIf nothing's changed and it still feels accurate, just say so and we can close out.",
+};
+
+export function ScorecardAgent({ savedContext }: { savedContext: string | null }) {
+  const hasExisting = !!savedContext;
+  const [mode, setMode] = useState<"view" | "chat">(hasExisting ? "view" : "chat");
+  const [messages, setMessages] = useState<Message[]>(
+    hasExisting ? [OPENER_REVISIT] : [OPENER_NEW]
+  );
+  const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [context, setContext] = useState(savedContext ?? "");
+  const [showUpdatedContext, setShowUpdatedContext] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streaming]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || streaming) return;
+
+    // For revisit mode, inject the existing narrative as context in the first user turn
+    let next: Message[];
+    if (hasExisting && messages.length === 1) {
+      next = [
+        OPENER_REVISIT,
+        { role: "user", content: `Current narrative:\n\n${savedContext}\n\n---\n\n${text}` },
+      ];
+    } else {
+      next = [...messages, { role: "user", content: text }];
+    }
+
+    // Display version — don't show the injected context blob in the chat UI
+    const displayMessages: Message[] = hasExisting && messages.length === 1
+      ? [...messages, { role: "user", content: text }]
+      : next;
+
+    setMessages(displayMessages);
+    setInput("");
+    setStreaming(true);
+
+    const res = await fetch("/api/agents/scorecard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: next }),
+    });
+    if (!res.body) { setStreaming(false); return; }
+
+    let assistant = "";
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      assistant += decoder.decode(value, { stream: true });
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: "assistant", content: assistant };
+        return updated;
+      });
+    }
+    setStreaming(false);
+
+    // Surface save option when agent produces a complete narrative
+    if (assistant.includes("## Product") && assistant.includes("## Key metrics")) {
+      setContext(assistant);
+      setShowUpdatedContext(true);
+    }
+  }
+
+  async function saveContext() {
+    setSaving(true);
+    await fetch("/api/agents/scorecard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: [], save: context }),
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  }
+
+  function startRevisit() {
+    setMode("chat");
+    setMessages([OPENER_REVISIT]);
+    setInput("");
+    setShowUpdatedContext(false);
+  }
+
+  // ── View mode (existing narrative) ──────────────────────────────────────────
+  if (mode === "view" && hasExisting) {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-md border border-border bg-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Your value narrative
+            </p>
+            <button
+              onClick={startRevisit}
+              className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Revisit &amp; update
+            </button>
+          </div>
+          <pre className="whitespace-pre-wrap text-xs text-foreground font-mono leading-relaxed max-h-64 overflow-y-auto">
+            {savedContext}
+          </pre>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          The Team Coach reads this before every session. Update it when your ICP shifts, you learn something from a lost deal, or your product materially changes.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Chat mode ───────────────────────────────────────────────────────────────
+  return (
+    <div className="space-y-4">
+      {/* Updated narrative ready to save */}
+      {showUpdatedContext && context && (
+        <div className="rounded-md border border-accent/30 bg-accent/5 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-accent uppercase tracking-wide">
+              Updated narrative — ready to save
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={saveContext}
+                disabled={saving}
+                className="flex items-center gap-1 text-xs text-accent hover:underline disabled:opacity-50"
+              >
+                <Save className="h-3 w-3" />
+                {saving ? "Saving…" : saved ? "Saved" : "Save to org"}
+              </button>
+              {hasExisting && (
+                <button
+                  onClick={() => setMode("view")}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Back to current
+                </button>
+              )}
+            </div>
+          </div>
+          <textarea
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
+            rows={12}
+            className="w-full rounded border border-border bg-background px-3 py-2 text-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+          />
+        </div>
+      )}
+
+      {/* Chat */}
+      <div className="rounded-md border border-border bg-card overflow-hidden">
+        <div className="border-b border-border px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span className="text-xs font-semibold text-foreground">
+              {hasExisting ? "Revise your value narrative" : "Value narrative agent"}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">Claude Opus 4.8 · paid per send</span>
+            {(hasExisting || messages.length > 1) && (
+              <button
+                onClick={() => hasExisting ? setMode("view") : undefined}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <RotateCcw className="h-3 w-3" />
+                {hasExisting ? "Cancel" : "Restart"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="h-80 overflow-y-auto px-4 py-4 space-y-4">
+          {messages.map((m, i) => (
+            <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+              <div className={cn(
+                "max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
+                m.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground"
+              )}>
+                {m.content}
+                {i === messages.length - 1 && streaming && m.role === "assistant" && (
+                  <span className="inline-block w-1 h-3.5 bg-foreground/40 ml-0.5 animate-pulse" />
+                )}
+              </div>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+
+        <div className="border-t border-border px-4 py-3 flex gap-2">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+            }}
+            placeholder={hasExisting
+              ? "What's changed? Or say 'nothing changed' to confirm and close out…"
+              : "Describe your product… (Enter to send, Shift+Enter for newline)"
+            }
+            rows={2}
+            disabled={streaming}
+            className="flex-1 resize-none rounded border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+          />
+          <button
+            onClick={send}
+            disabled={streaming || !input.trim()}
+            className="self-end px-3 py-2 rounded bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-90 transition-opacity"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
