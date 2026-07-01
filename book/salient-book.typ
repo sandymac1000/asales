@@ -275,6 +275,10 @@
   "MEDDPICC as a diagnostic: what you know, what you don't, and what the gaps mean")
 #toc-entry("05", "The Late Game",
   "Decision criteria, paper process, competition, and the stoic approach to the final stretch")
+#toc-entry("06", "The War Room",
+  "Enterprise selling is a team sport — red teaming, shared ownership, and the agent as team member")
+#toc-entry("07", "Negotiation",
+  "Getting to yes, knowing when to call time, and the art of trading rather than conceding")
 
 #v(0.5em)
 #line(length: 30%, stroke: 0.5pt + muted)
@@ -283,7 +287,7 @@
 #text(size: 9.5pt, weight: "bold", fill: textcol, "Appendix — Starter Documents")
 #v(0.4em)
 #text(size: 9pt, fill: muted,
-  "Mutual NDA · SaaS Licence Agreement · Pilot/POC Agreement · Data Processing Agreement · Commercial Summary"
+  "Mutual NDA · SaaS Licence Agreement · Pilot/POC Agreement · Data Processing Agreement · Commercial Summary · Negotiation Preparation Worksheet"
 )
 
 // ═══════════════════════════════════════════════════════════════════════════════
