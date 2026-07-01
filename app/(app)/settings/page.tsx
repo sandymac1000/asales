@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/lib/hooks/use-org";
 import { formatCurrency } from "@/lib/format";
 import { ScorecardAgent } from "@/components/settings/scorecard-agent";
+import { MarketAgent } from "@/components/settings/market-agent";
+import { ModelPicker } from "@/components/settings/model-picker";
 import type { Features } from "@/lib/supabase/types";
 
 // Grouped by what they UNLOCK, not by internal key naming
@@ -159,6 +161,25 @@ export default function SettingsPage() {
           Have a guided conversation with an AI coach to build your MEDDPICC value narrative — what your product moves, who buys it, and how to quantify the pain. The Team Coach reads this to give sharper deal-level advice.
         </p>
         <ScorecardAgent savedContext={org.product_context ?? null} />
+      </section>
+
+      {/* Market & buyers */}
+      <section className="mb-10">
+        <SectionHeading>Market &amp; buyers</SectionHeading>
+        <p className="text-xs text-muted-foreground mb-4 -mt-2">
+          Build a buyer profile for your target market. The Team Coach uses this to give advice specific to your sector — EB titles, procurement norms, common objections, and the right terminology.
+        </p>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <MarketAgent marketContext={(org as any).market_context ?? null} productContext={org.product_context ?? null} />
+      </section>
+
+      {/* Agent models */}
+      <section className="mb-10">
+        <SectionHeading>Agent models</SectionHeading>
+        <p className="text-xs text-muted-foreground mb-4 -mt-2">
+          Choose which Claude model powers each agent. Opus 4.8 gives the best coaching quality; Sonnet 4.6 is a strong default for structured tasks at lower cost.
+        </p>
+        <ModelPicker />
       </section>
 
       {/* Targets */}

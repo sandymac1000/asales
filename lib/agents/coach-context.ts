@@ -1,7 +1,12 @@
 import { formatCurrency, formatDate, isOverdue } from "@/lib/format";
 import type { DealFull } from "@/lib/supabase/types";
 
-export function buildCoachContext(deal: DealFull, lastSessionSummary?: string | null, productContext?: string | null): string {
+export function buildCoachContext(
+  deal: DealFull,
+  lastSessionSummary?: string | null,
+  productContext?: string | null,
+  marketContext?: string | null,
+): string {
   const lines: string[] = [];
 
   // Org value narrative (from Settings scorecard agent)
@@ -9,6 +14,14 @@ export function buildCoachContext(deal: DealFull, lastSessionSummary?: string | 
     lines.push("=== PRODUCT VALUE NARRATIVE ===");
     lines.push(productContext.trim());
     lines.push("=== END NARRATIVE ===");
+    lines.push("");
+  }
+
+  // Market & buyer context (from Settings market agent)
+  if (marketContext?.trim()) {
+    lines.push("=== MARKET & BUYER CONTEXT ===");
+    lines.push(marketContext.trim());
+    lines.push("=== END MARKET CONTEXT ===");
     lines.push("");
   }
 

@@ -158,11 +158,17 @@ IMPORTANT RULES:
 6. The agent_summary should capture the single most important insight a sales leader would want to know`;
 }
 
-export async function runDebriefAgent(deal: DealFull, transcript: string): Promise<DebriefResult> {
+export async function runDebriefAgent(
+  deal: DealFull,
+  transcript: string,
+  model = "claude-opus-4-8",
+): Promise<DebriefResult> {
+  // thinking: adaptive is only supported on Opus models
+  const useThinking = model.includes("opus");
   const response = await client.messages.create({
-    model: "claude-opus-4-8",
+    model,
     max_tokens: 8000,
-    thinking: { type: "adaptive" },
+    ...(useThinking ? { thinking: { type: "adaptive" as const } } : {}),
     tools: [EXTRACTION_TOOL],
     tool_choice: { type: "any" },
     system: buildSystemPrompt(deal),

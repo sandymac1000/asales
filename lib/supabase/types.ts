@@ -17,6 +17,8 @@ export interface Organization {
   q4_target_acv: number | null
   annual_target_acv: number | null
   product_context: string | null
+  market_context: string | null
+  agent_models: { coach: string; debrief: string; qualify: string; scorecard: string }
   created_at: string
   updated_at: string
 }

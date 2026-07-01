@@ -65,8 +65,18 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Load org model preference
+  const { data: profileRaw } = await db.from("users").select("organization_id").eq("id", user.id).single();
+  const orgId = (profileRaw as { organization_id: string } | null)?.organization_id;
+  let qualifyModel = "claude-sonnet-4-6";
+  if (orgId) {
+    const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
+    const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
+    if (agentModels?.qualify) qualifyModel = agentModels.qualify;
+  }
+
   try {
-    const result = await runQualificationAgent(deal, fieldAges);
+    const result = await runQualificationAgent(deal, fieldAges, qualifyModel);
 
     // Persist score to deal
     await db

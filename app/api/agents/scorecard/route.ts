@@ -57,9 +57,19 @@ export async function POST(req: Request) {
     return Response.json({ ok: true });
   }
 
+  // Load org model preference
+  const { data: profileForModel } = await db.from("users").select("organization_id").eq("id", user.id).single();
+  const orgId = (profileForModel as { organization_id: string } | null)?.organization_id;
+  let scorecardModel = "claude-opus-4-8";
+  if (orgId) {
+    const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
+    const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
+    if (agentModels?.scorecard) scorecardModel = agentModels.scorecard;
+  }
+
   // Stream the conversation
   const stream = await anthropic.messages.stream({
-    model: "claude-opus-4-8",
+    model: scorecardModel,
     max_tokens: 1024,
     system: SYSTEM,
     messages,

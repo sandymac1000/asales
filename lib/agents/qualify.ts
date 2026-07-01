@@ -92,12 +92,13 @@ Compute the score. Be conservative — it is better to flag risk early than to v
 
 export async function runQualificationAgent(
   deal: Deal,
-  fieldAges: Record<string, number>
+  fieldAges: Record<string, number>,
+  model = "claude-sonnet-4-6",
 ): Promise<QualificationResult> {
   const dealWithAges: DealWithStaleness = { ...deal, field_ages: fieldAges };
 
   const response = await client.messages.create({
-    model: "claude-haiku-4-5",
+    model,
     max_tokens: 2000,
     tools: [SCORING_TOOL],
     tool_choice: { type: "any" },

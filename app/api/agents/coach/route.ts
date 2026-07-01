@@ -1,22 +1,25 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { buildCoachContext, estimateTokens, estimateCost } from "@/lib/agents/coach-context";
+import { detectVertical, getPlaybook } from "@/lib/agents/domain-playbooks";
 import type { DealFull } from "@/lib/supabase/types";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM = `You are a seasoned B2B enterprise sales coach with 20 years of experience helping technical founders close their first significant deals. You have been given a snapshot of a specific deal.
+const BASE_SYSTEM = `You are a senior B2B enterprise sales coach. You have spent 20 years in the room with technical founders learning to sell. You know what good looks like and you say so.
 
-Your style:
-- Direct and specific — reference actual names, numbers, and dates from the deal data
-- One probing question per response — never a list of questions
-- Name the problem clearly before asking the question
-- Explain WHY a gap matters, not just that it exists
-- Use MEDDPICC by name — this is a teaching moment
-- Be honest: if a deal looks at risk, say so clearly
-- Acknowledge what is working — good hygiene deserves recognition
-- Keep responses to 3-5 sentences then one question
-- Do not cheerlead. Your job is rigorous thinking, not comfort.`;
+TONE — apply these without exception:
+- Never open with "Great question", "Absolutely", "Certainly", "That's a tough one", "I understand your frustration", or any validation before substance. Start with the observation.
+- Never be condescending. You are talking to an intelligent person learning a new skill, not a student who needs correcting.
+- Speak with candour: if a deal looks at risk, name it plainly — "This deal is at risk. Here is why: [specific evidence from the deal]."
+- Challenge by questioning, not by telling: "What's your evidence that the CFO supports this?" not "You're assuming the CFO supports this."
+- Reference deal specifics — actual names, actual amounts, actual dates from the context. Generic advice is worthless.
+- One probing question per response. Never a list of questions.
+- Structure: 3–5 sentences of specific observation, then one question.
+- Disagree explicitly when the founder's read looks wrong — state your read, your reasoning, then ask what they're seeing that you're not.
+- Acknowledge what is working — good discipline deserves recognition without fanfare.
+- Do not cheerlead. Your job is rigorous thinking, not comfort.
+- Use MEDDPICC by name when coaching on qualification gaps.`;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -60,15 +63,38 @@ export async function POST(req: Request) {
     .limit(1)
     .maybeSingle();
 
-  // Load org product context (value narrative from Settings scorecard agent)
+  // Load org context: product narrative, market context, agent model preference
   const { data: orgRaw } = await db
     .from("organizations")
-    .select("product_context")
+    .select("product_context, market_context, agent_models")
     .eq("id", (deal as unknown as { organization_id: string }).organization_id)
     .single();
-  const productContext = (orgRaw as { product_context: string | null } | null)?.product_context ?? null;
 
-  const dealContext = buildCoachContext(deal as DealFull, lastCoach?.agent_summary ?? null, productContext);
+  const org = orgRaw as {
+    product_context: string | null;
+    market_context: string | null;
+    agent_models: Record<string, string> | null;
+  } | null;
+
+  const productContext = org?.product_context ?? null;
+  const marketContext = org?.market_context ?? null;
+  const coachModel = org?.agent_models?.coach ?? "claude-opus-4-8";
+
+  // Auto-detect vertical from product context and inject domain playbook
+  let systemPrompt = BASE_SYSTEM;
+  if (productContext) {
+    const vertical = detectVertical(productContext);
+    if (vertical) {
+      systemPrompt += "\n\n" + getPlaybook(vertical);
+    }
+  }
+
+  const dealContext = buildCoachContext(
+    deal as DealFull,
+    lastCoach?.agent_summary ?? null,
+    productContext,
+    marketContext,
+  );
 
   // The opening exchange — seeds the conversation so the user can ask anything
   // or ask for an initial read without the model needing to re-read the context
@@ -87,8 +113,8 @@ export async function POST(req: Request) {
 
   if (countOnly) {
     const result = await anthropic.messages.countTokens({
-      model: "claude-opus-4-8",
-      system: SYSTEM,
+      model: coachModel,
+      system: systemPrompt,
       messages: allMessages,
     });
     const inputTokens = result.input_tokens;
@@ -99,9 +125,9 @@ export async function POST(req: Request) {
   }
 
   const stream = anthropic.messages.stream({
-    model: "claude-opus-4-8",
+    model: coachModel,
     max_tokens: 1024,
-    system: SYSTEM,
+    system: systemPrompt,
     messages: allMessages,
   });
 
@@ -133,3 +159,6 @@ export async function POST(req: Request) {
     }
   );
 }
+
+// Re-export for use in token counting (estimateTokens is used by the client)
+export { estimateTokens };
