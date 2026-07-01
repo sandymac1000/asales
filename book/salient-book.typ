@@ -134,6 +134,31 @@
   v(0.5em)
 }
 
+#let key-points(body) = block(
+  fill: surface, width: 100%, below: 2em, above: 2em,
+  stroke: (left: 3pt + accent),
+  inset: (left: 1.2em, right: 1.2em, top: 1em, bottom: 1em),
+  radius: (right: 2pt),
+  {
+    text(size: 8.5pt, weight: "bold", fill: accent, font: "Gill Sans", tracking: 1pt, upper("Key Points"))
+    v(0.6em)
+    body
+  }
+)
+
+#let top-tips(body) = block(
+  fill: textcol, width: 100%, below: 2em, above: 1.5em,
+  inset: (left: 1.3em, right: 1.3em, top: 1.1em, bottom: 1.1em),
+  radius: 3pt,
+  {
+    set text(fill: bg)
+    text(size: 8.5pt, weight: "bold", fill: accent.lighten(30%), font: "Gill Sans", tracking: 1pt, upper("Top Tips"))
+    v(0.6em)
+    set list(marker: text(fill: accent.lighten(30%), weight: "bold")[--], indent: 1.2em, spacing: 0.45em)
+    body
+  }
+)
+
 #let sig-block(party) = block(
   width: 100%, below: 1.5em, above: 1em,
   {
@@ -494,6 +519,81 @@ For a STEM startup, gross margin is often lower in the early years because of ma
 
 The reason this matters for sales: buyers at enterprise scale sometimes ask about your financial position. Investors certainly do. A business with 40% gross margin in a pure SaaS category is either underpriced, over-serviced, or has cost structure problems --- and sophisticated counterparties will notice.
 
+== The Annual Plan: Working Backwards from the Number
+
+#fig("[Figure: Sisyphus on the mountain — the Sisyphean nature of outbound enterprise selling without a plan]")
+
+Sisyphus was condemned to roll a boulder up a hill for eternity. Each time he neared the summit, it rolled back down. Most enterprise sales teams operate this way: chasing individual deals, celebrating closures, then looking up to find the pipeline empty and starting again. The plan is the mechanism by which you stop being Sisyphus.
+
+Enterprise sales is almost never market updraft. The founders who have experienced it --- a product that spreads virally through an organisation, inbound demand that outpaces capacity --- are rare. The overwhelming majority of B2B enterprise selling is outbound, high-touch, and Sisyphean by default. The plan does not remove the effort. It makes the effort productive rather than circular.
+
+=== Working Backwards from Revenue
+
+Start with the number your company needs to hit. Then work backwards:
+
+*Annual recurring revenue target:* e.g. £1.5M ARR new business
+
+*Average ACV:* e.g. £120k
+
+*Required new logos:* £1.5M ÷ £120k = ~13 new customers
+
+*Win rate (qualified pipeline to closed):* e.g. 25%
+
+*Required qualified pipeline:* 13 ÷ 0.25 = 52 qualified opportunities
+
+*Pipeline conversion (leads to qualified):* e.g. 20%
+
+*Required leads into process:* 52 ÷ 0.20 = 260 initial conversations
+
+*Average sales cycle:* e.g. 7 months
+
+This means 260 initial conversations need to enter the process across the year --- roughly 22 per month --- and the pipeline you are working now will close in Q3 and Q4. The Q1 target is not closed from Q1 pipeline. It is closed from pipeline that was built in Q2 and Q3 of the prior year.
+
+Most STEM founders treat this maths as abstract. The ones who operate to plan treat it as a weekly operational dashboard.
+
+=== ACV Threshold: When High-Touch Is Viable
+
+High-touch outbound enterprise sales has a minimum viable price point. Below it, the economics of selling outpace the economics of the product.
+
+#set text(size: 9pt)
+#table(
+  columns: (2fr, 1.5fr, 2.5fr),
+  stroke: none,
+  inset: (x: 0.7em, y: 0.55em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[ACV range]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Motion]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Rationale]),
+  strong[< £15k], [PLG or self-serve only], [CAC economics impossible at this price with sales involvement],
+  strong[£15k -- £50k], [Low-touch inside sales], [Short cycle possible; limited in-person investment],
+  strong[£50k -- £150k], [High-touch outbound], [Viable with efficient process; founder-led initially],
+  strong[£150k -- £500k], [Enterprise / strategic], [Multi-stakeholder; 6-12 month cycle; exec sponsorship required],
+  strong[> £500k], [Strategic accounts], [Board-level relationships; long-cycle; dedicated AE],
+)
+#set text(size: 10.5pt)
+
+Agentic sales tools (including Salient) are beginning to compress the bottom of this range. A founder who can run five structured coaching sessions simultaneously, with AI handling preparation and debrief, may extend the viable threshold down to £30--40k. But the fundamental economics do not disappear: every enterprise deal requires human judgement, executive relationships, and a paper process. The question is how much time each of those takes.
+
+The practical implication: if your current ACV is below the viable threshold for your chosen motion, either raise prices or redesign the sales model. Outbound enterprise sales at £20k ACV does not work without a very short cycle, a very high win rate, or an unusually low cost of sale. Build the plan first, then check whether the motion and the price point are coherent.
+
+#key-points([
+  - Product truth is about commercial system design, not technical capability
+  - Quantify value in the unit your buyer measures: money saved, revenue enabled, risk reduced
+  - Know your ICP precisely — not every company with a need is a customer worth pursuing
+  - Price on value delivered, not cost plus margin; price anchoring reveals what buyers already spend
+  - High-touch outbound enterprise sales requires ACV ≥ £50--100k to be economically viable
+  - Build the annual plan by working backwards from revenue, through win rate, to required pipeline cadence
+  - Know your gross margin per customer and your path to the category benchmark
+])
+
+#top-tips([
+  - Write your value statement in one sentence: "[Product] helps [ICP title] at [ICP company type] [verb] [measurable outcome] by [mechanism]." If you cannot complete this sentence, you are not ready to sell.
+  - If you cannot answer "what does a bad month cost your customer without this?", you do not yet have a commercial case.
+  - Run one structured pricing conversation per week until you have three data points from real buyers — then you have a pricing position, not an assumption.
+  - Build the annual plan in the first two weeks of each year: revenue target → required logos → required pipeline → required cadence. Put it on one page. Review it monthly.
+  - If your ACV is below the viable threshold, do not add salespeople. Fix the price or redesign the motion first.
+])
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CHAPTER 2
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -641,6 +741,23 @@ A deal without a live, agreed next action is not a deal. It is a conversation th
   Alexander the Great never fought through proxies where he could fight directly. He made personal contact with opposing generals, decision-makers, and city leaders rather than sending intermediaries. In modern sales: the founder who meets the EB personally will almost always outsell the one who sends a sales rep or relies on a champion to carry the message.]
 )
 
+#key-points([
+  - Getting the EB meeting is a milestone; arriving unprepared to it is a waste of the milestone
+  - Your champion is your intelligence source — invest in the relationship proportionally to the deal size
+  - Ethos (credibility) and Pathos (consequence) matter as much as Logos (logic) in an EB conversation
+  - The next action must be agreed in the meeting, owned by a named person, and dated
+  - Know the decision process before you pitch — who approves, in what sequence, on what criteria
+  - A deal without a live, agreed next action is a conversation that has paused, not a deal
+])
+
+#top-tips([
+  - Never leave a meeting without a live next action with a date. If you cannot agree one, the deal has a problem.
+  - Spend 30 minutes before any EB meeting on preparation: who they are, what their stated priorities are, what the likely objections are, and what a successful outcome looks like.
+  - Ask the champion before the meeting: "If this doesn't happen, what is the cost to you personally?" The answer tells you how hard they will fight.
+  - After every call, email a one-line summary: "Thanks for the time --- we agreed [X] by [date]. I'll send [Y] by [date]." This is your paper trail and your accountability mechanism.
+  - If the champion cannot get you a meeting with the EB, ask why. The answer is often the most important data point in the deal.
+])
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CHAPTER 3
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -738,6 +855,23 @@ The check-in is not a checkpoint. It is a meeting with a sales objective --- eve
 
   Darwin's observation that species which adapt to new environments survive --- while those which over-specialise in a single niche are vulnerable --- applies directly to the founder who closes one enterprise deal and builds the entire company around that one customer's requirements. Diversify the customer base. Build product capabilities that serve the expansion EB, not just the initial buyer. The beachhead is not the destination.]
 )
+
+#key-points([
+  - The first enterprise close is a beachhead, not a destination; start planning expansion from day one
+  - Land with one team that has an acute, quantifiable problem; expand to adjacent teams with adjacent problems
+  - Value delivered in the pilot is your best case for expansion — instrument it from the start
+  - Expansion economics are dramatically better than new logo economics: no new trust to build, shorter cycle, higher win rate
+  - The check-in is not just customer success — it is a sales meeting with a customer success framing
+  - Identify your expansion champion in the first 30 days; they may be different from your initial champion
+])
+
+#top-tips([
+  - Start the expansion conversation at the 60-day check-in, not at renewal time. By renewal, it should already be agreed.
+  - Build a success metric into the pilot contract that you know you can hit, and that the expansion EB will care about.
+  - At the 30-day check-in ask: "Which other teams have asked you about this?" The answer is your expansion pipeline.
+  - Do not wait to be invited to the expansion meeting. Propose the agenda and the attendees. Own the next step.
+  - If you cannot name the expansion champion by day 45, you are behind. Make finding them an explicit action.
+])
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CHAPTER 4
@@ -872,6 +1006,23 @@ The test: "If this deal were in danger of being delayed by three months due to a
   John von Neumann, one of the architects of game theory, established that optimal play requires complete knowledge of the game state. You cannot make the best move in a chess game without knowing where all the pieces are. MEDDPICC is the mechanism for knowing where all the pieces are in a deal. A founder who cannot describe the game state of their three most important deals is not playing optimally.]
 )
 
+#key-points([
+  - MEDDPICC is a diagnostic tool, not a box-ticking exercise; use it to find gaps, not to fill a form
+  - Unqualified deals consume pipeline capacity that could go to closeable deals — cut them early and decisively
+  - Champion and Economic Buyer are the two relationships that determine whether deals close; both must be real
+  - Metrics must be the buyer's metrics, stated in their language, tied to their business outcomes
+  - A sponsor sympathises when the deal is hard; a champion fights. Know which one you have.
+  - A deal you cannot fully qualify is not a deal — it is a research project with an unknown completion date
+])
+
+#top-tips([
+  - Run a MEDDPICC gap analysis on every deal in your pipeline, weekly. Any field you cannot fill in is a next action.
+  - If you cannot name the champion or articulate their personal stake in the outcome, you do not have a champion yet.
+  - Ask the question nobody wants to ask: "What happens to this project if it doesn't get approved?" The answer tells you how real the urgency is.
+  - Know the decision criteria before you propose. If you do not know, ask the champion to walk you through the last time they bought something of similar size.
+  - Qualify out generously. The deal you cut loose in month two is better than the deal you lose in month eight.
+])
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CHAPTER 5
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1002,6 +1153,345 @@ Present this as a calculation, not a sales argument. The founder who walks throu
 
   Marie Curie worked for years on radioactivity research in conditions that were literally hostile to her health, her gender, and her institutional standing. She did not move faster by ignoring the obstacles. She moved faster by being more methodical than anyone around her. The paper process requires the same quality: patient, systematic, thorough. Document every request. Follow up on schedule. Know where every outstanding item sits. Speed in the final steps of a deal comes from organisation, not from chasing.]
 )
+
+#key-points([
+  - Competition is wider than direct vendors: status quo, internal build, and "do nothing" are your most common opponents
+  - The paper process is selling by other means; treat every procurement interaction as a negotiation
+  - The build vs buy conversation is best had as a calculation, not a sales argument
+  - Speed at the end of a deal comes from organisation and preparation, not from chasing
+  - Know who needs to approve your deal before you write the proposal; structure accordingly
+  - Competition won on value is durable; competition won on price is fragile
+])
+
+#top-tips([
+  - Map every outstanding legal and procurement item with a named owner, a current status, and a due date. Review weekly.
+  - Know your competitor's weaknesses before your buyer does. If a competitive displacement is possible, the champion needs ammunition to make the case internally.
+  - If you are more than 60 days into a paper process with no signed order, there is a decision lurking that you have not yet found. Ask the champion directly: "What is the one thing that could still stop this?"
+  - Present the build vs buy analysis yourself, including the cases where building might make sense. The founder who pre-empts the objection is more credible than the one who reacts to it.
+  - The commercial summary document (Appendix E) can halve the time from verbal agreement to signed order. Use it.
+])
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHAPTER 6
+// ═══════════════════════════════════════════════════════════════════════════════
+#chapter-opener(
+  "06",
+  "The War Room",
+  [_"Failure is not an option."_
+
+  #v(0.4em)
+  #text(fill: muted, size: 9.5pt)[--- Gene Kranz, Flight Director, NASA Apollo 13]
+
+  #v(0.6em)
+  On 13 April 1970, an oxygen tank aboard Apollo 13 exploded 200,000 miles from Earth. Gene Kranz did not attempt to solve the crisis alone. He assembled his team in Mission Control, divided the problem into parallel workstreams, assigned ownership to individuals, and imposed a discipline of communication that prevented the chaos of the situation from becoming the chaos of the response. "Failure is not an option" was not a motivational slogan. It was an operating principle for a team under extraordinary pressure. The enterprise deal, in its most critical weeks, requires the same quality of response. Not one person solving all the problems. A team, organised, owning the work, and communicating with precision.]
+)
+
+== The Myth of the Lone Wolf Closer
+
+The mythology of sales celebrates individual heroes: the rainmaker who wins the impossible deal, the founder who closes a Series A customer on charm and conviction, the rep who goes around the system and makes something happen. These stories are real. They are also the exception.
+
+Enterprise deals of substance are won by teams. The champion works their internal network. The technical team handles the proof of concept. The legal team negotiates the paper. The executive sponsor provides air cover with the customer's board. The founder or account lead orchestrates. No single person does all of this well, and no deal of complexity should depend on one person doing so.
+
+The War Room is the organising principle for a deal that matters: a shared space --- physical or virtual --- where the team thinks together, challenges each other, and owns the work collectively. Salient is built around this model. The deal is not the founder's deal. It is the team's deal.
+
+This chapter is not in the main methodology of Salient because MEDDPICC is an individual discipline that any one person can apply. The War Room is the team discipline that makes the methodology work at scale. Both are required.
+
+== War Room Discipline
+
+The War Room is not a meeting. It is a discipline that expresses itself through meetings, but its value is in the habits that surround the meetings.
+
+=== Pre-Meeting Scheming
+
+Before any significant customer meeting --- EB presentation, commercial proposal, negotiation session --- the team meets to prepare. This is not a rehearsal. It is a strategy session.
+
+Agenda: What do we know about this meeting? What are the likely objections? What does a successful outcome look like, in specific terms? What are the three most important things we need to learn? Who is in the room, and what do each of them care about? What does the champion tell us about the internal dynamics? What have we agreed with the customer to date, and does it still hold?
+
+The pre-meeting scheming session should be shorter than the meeting it is preparing for. Thirty minutes of focused preparation will change what happens in a one-hour EB call more than any amount of polishing the slide deck.
+
+=== Red Team / Blue Team
+
+The blue team is the deal team: they believe in the deal, know its strengths, and are motivated to close it. The red team takes the buyer's perspective --- or the competitor's perspective --- and challenges every assumption.
+
+Red teaming works because the human brain is not good at finding the flaws in its own plans. When you have lived with a deal for three months, you have developed explanations for why the unusual things are not problems. The red team has not. They see the deal fresh, and they will find the problems you have been explaining away.
+
+The discipline: the red team is not supposed to be polite. They are supposed to be ruthless. "What is the single most likely reason this deal does not close?" is the opening question. Work through it methodically. Then let the blue team respond. The gaps between the red team's attack and the blue team's defence are the actions.
+
+=== Shared Action Ownership
+
+Every action item from a War Room session has: a description, a named owner, and a date. Not "we should follow up with the legal team." But "Sandy will send the redlined MSA to [Customer] legal with a cover note explaining clause 8 by Thursday."
+
+This is not bureaucracy. It is the mechanism by which a team coordinates without the founder having to chase every thread personally. The weekly War Room review opens with: what was committed, what was done, what is outstanding, and what is now at risk.
+
+=== The Question Nobody Wants to Ask
+
+Every deal has a question that the team is collectively avoiding. It is usually the most important question in the deal.
+
+"Does the CFO actually know about this deal?"
+
+"Has anyone told the champion that the procurement timeline they described is not achievable?"
+
+"Is the EB actually going to approve this, or are they just being polite to the founder?"
+
+The War Room's job is to surface this question and answer it. The team lead's job is to create an environment where it is safe to ask it. Founders who build War Rooms where difficult truths are unwelcome will find that their team stops bringing them.
+
+== Roles in the Room
+
+Not every deal needs every role. But knowing what each role does helps you see the gaps.
+
+*Deal owner:* Accountable for the deal. Knows the MEDDPICC status of every field. Makes the final call on strategy. Usually the founder or lead AE.
+
+*Coach / analyst:* Challenges assumptions, maintains the qualification rigour, asks the question nobody wants to ask. In Salient, the Team Coach agent plays a version of this role in every session.
+
+*Red team lead:* Takes the opposing position in preparation sessions. Best filled by someone not close to the deal — another founder, a senior advisor, or a board member with sales experience.
+
+*Executive sponsor:* Provides peer-level relationship with the customer's economic buyer. Opens doors the deal team cannot open. Should not be involved in day-to-day deal mechanics.
+
+*Administrative owner:* Owns the paper process. Tracks every document, every outstanding redline, every procurement request. Detail-oriented and organised. Often underrated until the deal is stuck in legal.
+
+== Red Teaming as a Discipline
+
+Red teaming is worth treating separately from the War Room because it is the discipline most often skipped.
+
+The reason it is skipped: it is uncomfortable. The deal team has invested time, emotion, and credibility in a deal. Having someone tell them the deal is likely to fail, and why, is genuinely difficult. The founder who started the company, ran the demo, built the champion relationship, and written the proposal does not want to hear that the EB is probably not going to approve it.
+
+The reason it must not be skipped: the red team's discomfort is minor compared to the cost of a deal that fails in month eight because of a problem that was visible in month five and not addressed.
+
+The minimum viable red team session: take your three most important deals. For each, give someone not on the deal team fifteen minutes to read the deal summary (MEDDPICC state, current status, next steps) and then ask them one question: "What is the most likely reason this deal does not close?" Listen without defending. Write down what they say. Discuss after.
+
+Do this monthly on your top deals. The friction is worth it.
+
+== The Agent as Team Member
+
+One of the structural challenges of early-stage enterprise selling is that the team is small. The founder is often the deal owner, the red team, the coach, and the administrative owner simultaneously. There is no one to challenge their assumptions who is not also the person who made the assumptions.
+
+The Team Coach in Salient is a partial answer to this. It cannot replace a human red team. But it can ask the questions that a good coach would ask, challenge the deal state with Socratic precision, and surface gaps that the founder has been explaining away.
+
+More broadly: agentic tools are beginning to democratise the War Room. The preparation work that used to require a team --- competitive analysis, market research, stakeholder mapping, document drafting --- can now be done with an AI collaborator in a fraction of the time. This compresses the time-cost of running a proper War Room for a team of two or three.
+
+The implication is not that founders should not hire. It is that the first few hires can be more senior, and more focused on relationships and judgement, because the administrative and analytical work is increasingly handled by agents. The War Room becomes viable earlier in the company's life.
+
+== Debrief Culture
+
+Win or lose, the deal is not over when it closes. It is over when the debrief is complete.
+
+The post-mortem on a lost deal is obvious: what did we miss? Where did the qualification fail? What would we do differently? But the post-mortem on a won deal is equally important and far more often skipped.
+
+What won this deal? Was it the champion? The timing? The pricing? A competitor's mistake? If you do not know why you won, you cannot reliably replicate it. You will ascribe the win to your general brilliance and miss the specific factors that actually mattered.
+
+The debrief has three parts: what we said we would do (the plan), what actually happened (the reality), and what we will do differently next time (the learning). It should take no more than 45 minutes and should produce at least three specific action items for the next deal of this type.
+
+In Salient, the debrief agent is the tool for this conversation. Use it.
+
+== The Weekly Cadence
+
+The War Room requires a cadence. Without it, the discipline lapses between crises. The cadence is what prevents the Sisyphean pattern.
+
+*Weekly deal review (30--45 minutes):* Cover every live deal above a value threshold. For each: current stage, MEDDPICC status, next action, and any blockers. The meeting should be run from the Salient pipeline view, not from a spreadsheet.
+
+*Bi-weekly pipeline review (60 minutes):* Broader view. Includes deals at early stage. What is coming into the pipeline? What is the coverage against the annual plan? Are there patterns in what is qualifying and what is not?
+
+*Monthly red team session (60 minutes):* Take the top three deals. Apply the red team discipline described above. Produce action items.
+
+*Quarterly planning (half day):* Review the annual plan. Adjust based on what is actually happening. What does the pipeline look like against target? What has changed in the market, the product, or the competitive landscape?
+
+The weekly cadence is not optional. It is the mechanism by which strategy becomes execution.
+
+#sidebar("Shackleton and Turing",
+  [Ernest Shackleton's Endurance expedition became trapped in Antarctic ice in 1915. For 22 months, Shackleton managed a team of 27 men under conditions of extraordinary physical and psychological stress. Not one person died. The outcome was not the result of Shackleton's individual heroism. It was the result of his discipline in maintaining team morale, distributing responsibility, and creating a structure within which each person knew their role. The War Room, at its best, is Shackleton's approach applied to a deal: every person knows what they own, and the leader's job is to keep the team functional under pressure.
+
+  Alan Turing's work at Bletchley Park succeeded not because Turing was brilliant in isolation --- though he was --- but because he worked within a team that combined mathematical talent, linguistic expertise, operational experience, and mechanical engineering. The breakthrough on the Enigma machine required all of these simultaneously. No single person could have done it. The enterprise deal of substance requires the same combination of skills. Build the team, run the War Room, and win the deal together.]
+)
+
+#key-points([
+  - Enterprise deals of substance are won by teams, not individuals; the War Room is the organising principle
+  - Pre-meeting scheming (30 minutes before significant customer meetings) changes outcomes more than slide polish
+  - Red teaming is the discipline most often skipped and the one most correlated with avoiding late-stage deal failures
+  - Every action item needs a description, a named owner, and a date — not "we should follow up"
+  - The question nobody wants to ask is usually the most important question in the deal; the War Room's job is to surface it
+  - Agentic tools democratise the War Room for small teams; the Team Coach is a partial substitute for a human challenger
+  - Debrief every deal, won or lost; if you do not know why you won, you cannot reliably replicate it
+])
+
+#top-tips([
+  - Run pre-meeting scheming for every EB presentation and every negotiation session. 30 minutes. The same agenda every time.
+  - Red team your top three deals monthly. Give someone not on the deal team 15 minutes to read the deal summary, then ask: "What is the most likely reason this doesn't close?"
+  - Start every weekly deal review by reading the actions from the previous week. If they were not done, that is the first discussion.
+  - The debrief on a won deal is as important as the debrief on a lost one. Know why you won.
+  - If you are running a War Room alone (as a solo founder), use the Team Coach as your challenger. It will not pull punches if you tell it not to.
+])
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHAPTER 7
+// ═══════════════════════════════════════════════════════════════════════════════
+#chapter-opener(
+  "07",
+  "Negotiation: Getting to Yes (and Knowing When to Walk)",
+  [_"Beware of the man who works hard to learn something, learns it, and finds himself no wiser than before. He is full of murderous resentment of people who are ignorant without having come to the trouble of learning."_
+
+  #v(0.4em)
+  #text(fill: muted, size: 9.5pt)[--- Homer, _The Odyssey_ (after Odysseus)]
+
+  #v(0.6em)
+  Odysseus did not win the Trojan War with strength. He won it with cunning, patience, and a willingness to use every tool available to him --- including the horse, the stratagem, the lie, and the long wait. He was the cleverest man in the room, but he never let it show until the moment it mattered. Enterprise negotiation is not a battle of strength. It is a test of preparation, patience, and the willingness to walk away from a deal that will cost more than it returns. The founder who goes into a negotiation without preparation will be outmanoeuvred by a procurement team that does this every week.]
+)
+
+#callout[A note on ethics: this chapter describes negotiation tactics that are in common use in commercial settings and are legitimate tools for any party in a negotiation. It does not endorse deception, misrepresentation, or tactics that exploit power asymmetries unethically. The best negotiators build long-term reputations for fairness. In a market as small as B2B enterprise, your reputation from this negotiation will precede you into the next one.]
+
+== Negotiation Starts Before the Meeting
+
+The outcome of a negotiation is largely determined before the first concession is made. The preparation is the negotiation.
+
+Before any commercial negotiation, you need to know five things:
+
+*Your BATNA* (Best Alternative to a Negotiated Agreement): What do you do if this deal does not close? If your BATNA is weak --- if you have no other deals in the pipeline, or if this customer represents more than 30% of your target ARR --- you will make concessions you should not make.
+
+*Their BATNA:* What happens to them if this deal does not close? Are they facing a board deadline? Is the alternative to buy from you to build internally (expensive and slow)? Is there a regulatory trigger driving their timeline? Understanding their BATNA tells you how much leverage you have.
+
+*Your walk-away point:* The minimum terms at which this deal is worth doing. Know this before you sit down. Below this point, you say no.
+
+*Your anchor:* The opening position you intend to state. It should be ambitious but defensible. The anchor sets the frame for the negotiation that follows.
+
+*Your trade list:* The things you are willing to move on (and by how much), and the things you are not. This is not about flexibility in principle --- it is about the specific levers available to you: price, payment terms, contract length, SLA parameters, pilot scope, implementation support.
+
+The founder who enters a negotiation without this preparation will improvise. Improvisation in negotiation produces worse outcomes than preparation, consistently.
+
+== BATNA: The Foundation of Leverage
+
+Your BATNA is the most important number in any negotiation. Not the price. The BATNA.
+
+A strong BATNA --- three other qualified deals at similar ACV --- gives you the ability to say no to a bad deal without catastrophic consequence. A weak BATNA means you will accept terms that erode your margin, set a damaging precedent with your first enterprise customer, and signal to the market that you are negotiable in ways that will follow you for years.
+
+The strategic implication: pipeline coverage is not just a revenue forecasting tool. It is a negotiating tool. The founder who has built strong pipeline coverage going into a commercial negotiation has more leverage than the one who has been working this single deal for six months and has nothing else at the same stage.
+
+Build your BATNA before you negotiate, not during.
+
+== Anchoring: Who Puts the Number on the Table First
+
+There is a genuine debate among negotiation practitioners about whether to anchor first (put your number on the table) or to invite the other party to go first. The evidence is reasonably clear: anchoring first is advantageous when you have a defensible position and when your anchor is ambitious.
+
+The anchor creates the psychological frame for the negotiation. Even experienced negotiators anchor on the first number they hear, and adjustments from that anchor are typically insufficient. An ambitious anchor sets a high reference point from which concessions still produce an acceptable outcome.
+
+*When to anchor first:* When you have done the pricing work, your anchor is defensible with reference to value delivered, and you are willing to hold it under initial pushback.
+
+*When to let them go first:* When you genuinely do not know their budget range and the information value of hearing it outweighs the anchoring advantage. This is more common in early conversations, less common in formal commercial negotiations.
+
+*How to anchor:* State the price with rationale, not as a request for approval. "Our standard pricing for an organisation of your size is £X, reflecting [value delivered]. We're prepared to discuss structure, but this is where we start." Do not apologise for the number.
+
+== Never Split the Difference
+
+Chris Voss, former FBI hostage negotiator, identified a pattern that is directly applicable to commercial negotiation: when a counterpart asks you to split the difference, they are usually anchoring on a midpoint between a position they chose strategically and your real position. Splitting the difference rewards them for their anchor, not for the actual merit of the positions.
+
+The alternative: when asked to split the difference, acknowledge the request without conceding to it. "I understand you are looking for something in the middle. Let me think about what I can do that gets us closer, because I can't simply split from where we are." Then make a move that is smaller than the split they asked for, and attach a condition to it.
+
+More broadly: every concession you make should be labelled as a concession, should be smaller than the previous concession (to signal that you are approaching your limit), and should ideally be attached to something you receive in return.
+
+*The concession pattern:* Large initial move (to signal goodwill and create momentum), then progressively smaller moves, then a final number stated clearly as final. "I can go to £X. That is my best number. I am not going to be able to move further from here."
+
+== Trade, Not Concede
+
+The discipline of trading rather than conceding is one of the highest-value negotiation habits available to a founder.
+
+*Concession:* You give something. They receive it. The deal moves in their direction.
+
+*Trade:* You give something conditional on receiving something in return. The deal moves, but both sides move.
+
+The items available for trading in a software contract are wider than most founders realise:
+
+- Price in exchange for contract length (longer term at lower annual rate)
+- Price in exchange for payment terms (upfront payment for a discount)
+- Implementation support in exchange for a reference customer commitment
+- Pilot scope reduction in exchange for a faster close
+- SLA parameters (response time, uptime guarantee) in exchange for price
+- Feature priority (roadmap commitment) in exchange for a larger ACV
+
+The principle: do not give anything without asking for something. "I think we can move on pricing if you're willing to commit to a two-year term. Can we explore that?" is better than "We can do £X." The first is a trade. The second is a concession.
+
+== No as a Signal
+
+In enterprise sales, "no" is rarely final. It is usually a signal.
+
+"No" to the price is usually "I do not have authority to approve this at that price" or "I need a different structure" or "I need something to take to the CFO."
+
+"No" to the timeline is usually "I have a competing priority" or "the internal process takes longer than you think" or "I do not have the mandate yet."
+
+"No" to the pilot scope is usually "I am not confident enough in the outcome to commit resources" or "I need a lower-risk entry point."
+
+The skill is in reading which kind of "no" you have received. The champion is usually the best source of that intelligence. After a "no" from the EB, the conversation with the champion is: "What was behind that? Is it a pricing problem, a process problem, or a problem with how we presented the case?"
+
+A "no" that is a signal requires a different response than a "no" that is a decision. The founder who treats every "no" as a decision will lose deals they should have won. The founder who treats every "no" as a signal will chase deals they should have cut.
+
+The test: "What would need to be true for this to move forward?" If there is an answer, the "no" is a signal. If there is no answer, it is a decision.
+
+== Time as a Weapon
+
+Both parties in a negotiation have a relationship with time. Understanding theirs, and managing yours, is a significant lever.
+
+*Artificial deadlines:* The buyer's procurement team will often impose a deadline on you. This deadline may or may not be real. A quarter-end deadline from procurement is usually soft. A regulatory submission date is usually hard. A "we need to decide before the board meeting" is usually somewhere in between. Ask the champion which category this falls into.
+
+*Your own timeline:* Do not manufacture fake urgency unless you are prepared to hold it. "Our pricing is only available at this level until end of quarter" is a tactic. If the customer calls your bluff and asks for the same price next quarter, you need to be willing to walk away. Tactics that you are not willing to hold create the appearance of weakness.
+
+*Patience:* In the majority of negotiations, the party that is more patient will receive better terms. Enterprise procurement teams are experienced at waiting. Founders who need to close for cash flow reasons are at a disadvantage. This is another argument for BATNA: a strong pipeline means you can afford to be patient.
+
+*The deadline you set:* If you have made a proposal, set a review date. "I'll follow up on Thursday to understand where you are." This is not pressure — it is process management. It keeps the deal on the table and prevents the silence that signals stagnation.
+
+== Knowing When to Call Time
+
+The hardest judgement in enterprise sales is when to stop pursuing a deal.
+
+The signals that it is time:
+
+- The champion has stopped responding and cannot explain why
+- The EB has "deprioritised" the project without a rescheduled timeline
+- The deal has been "in legal review" for more than 90 days without specific progress
+- The decision criteria have shifted multiple times and now align precisely with a competitor's strengths
+- You have been asked to reduce price below your walk-away point and the other party has not moved on anything in return
+
+The cost of not walking away is underestimated. A deal that is unlikely to close in six months consumes pipeline reviews, management attention, coaching sessions, and founder energy. That cost is borne entirely by you. The customer's cost of keeping you in the process is close to zero.
+
+Walking away is not failure. It is qualification. The discipline of saying "we are going to close this or take it off the pipeline" is what allows a small team to maintain the cadence that the annual plan requires.
+
+How to walk away: professionally, specifically, and with a clear return condition. "We've been working on this for six months and I think we're both at a point where the timing isn't right. I'm going to take this off our active pipeline, but I'd love to revisit in Q3 when [specific trigger]. Would that work?" This closes the deal without burning the relationship.
+
+== What Salient Doesn't Coach
+
+Salient's Team Coach will help you prepare for negotiations, challenge your deal state, and think through leverage and BATNA. It will not tell you to do things that are ethically wrong or that will damage long-term relationships.
+
+The following are outside the scope of responsible sales coaching:
+
+- Misrepresenting product capability, delivery timelines, or reference customers
+- Using personal information about a counterpart in ways they would not consent to
+- Creating artificial scarcity or urgency that is not real
+- Exploiting information asymmetries that the counterpart would object to if they understood them
+
+These tactics may produce short-term wins. In a market as small and interconnected as the one you are selling into, they will produce long-term consequences. Enterprise sales is a reputation-dependent activity. Your counterpart in today's negotiation is tomorrow's reference, competitor, board member, or investor.
+
+Negotiate hard. Negotiate well. But negotiate with the relationship in mind.
+
+#sidebar("Odysseus and Mandela",
+  [Odysseus spent ten years trying to get home. He was not weak. He was strategic. He outwitted the Cyclops with cunning, navigated between Scylla and Charybdis by planning, and escaped the island of Calypso through patience and diplomacy. He never fought when he could think his way through. In enterprise negotiation, the founder who knows their BATNA, has done the preparation, and can hold their anchor under pressure will outperform the founder who relies on relationship warmth or product belief alone.
+
+  Nelson Mandela negotiated the end of apartheid from a position of formal powerlessness and emerged with a settlement that both sides could accept. His preparation was legendary: he studied his opponents, understood their constraints, knew what they needed to be able to say to their own constituencies, and structured his proposals accordingly. The deal you are trying to close may be smaller in scale, but the principle is the same: understand what the other side needs, not just what they are asking for, and you will find room to move that a less-prepared negotiator would never have seen.]
+)
+
+#key-points([
+  - Negotiation outcome is largely determined by preparation, not by the conversation itself
+  - BATNA is the foundation of leverage; build pipeline coverage before you negotiate, not during
+  - Anchoring first with a defensible, ambitious position is almost always advantageous
+  - Trade, do not concede: every move you make should be attached to a condition
+  - "No" is usually a signal, not a decision; the champion can translate what it means
+  - Time is a weapon on both sides; patience is a structural advantage in most enterprise negotiations
+  - Know your walk-away point before you sit down, and be willing to use it
+  - Reputation persists beyond the deal; negotiate hard but negotiate with the relationship in mind
+])
+
+#top-tips([
+  - Write down your BATNA, their BATNA, and your walk-away point before any commercial negotiation. If you have not done this, you are not ready.
+  - When asked to split the difference, do not. Make a smaller conditional move instead.
+  - State your anchor without apologising for it. Apology signals flexibility that has not yet been tested.
+  - Use the Negotiation Preparation Worksheet (Appendix F) before any deal above £50k ACV.
+  - If the champion stops responding, the deal has a problem. Do not wait for it to resolve itself.
+  - Walk away professionally. "Not now" with a clear return condition preserves the relationship.
+])
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // APPENDIX
@@ -1361,6 +1851,199 @@ Controller grants general authorisation for the sub-processors listed above. Pro
     "Questions? Contact [VENDOR COMMERCIAL CONTACT] at [EMAIL] or [PHONE]."
   )
 )
+
+// ── F. Negotiation Preparation Worksheet ─────────────────────────────────────
+#appendix-doc("F. Negotiation Preparation Worksheet",
+  subtitle: "Complete before any commercial negotiation above £50k ACV")
+
+#set text(size: 9.5pt)
+
+Use this worksheet to prepare for any significant commercial negotiation. Complete it before the meeting, share it with your War Room team, and use it to run the red team challenge. A deal negotiated without this preparation will produce worse outcomes than one negotiated with it.
+
+#v(0.6em)
+#text(size: 8pt, fill: muted, font: "Gill Sans", tracking: 0.8pt, upper("Deal context"))
+#v(0.3em)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(40%))
+#v(0.4em)
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  {
+    text(weight: "bold", "Customer: ") + " " * 20 + "_"
+    linebreak()
+    v(0.6em)
+    text(weight: "bold", "Deal name: ") + " " * 19 + "_"
+    linebreak()
+    v(0.6em)
+    text(weight: "bold", "Deal owner: ") + " " * 18 + "_"
+  },
+  {
+    text(weight: "bold", "Date of negotiation: ") + " " * 10 + "_"
+    linebreak()
+    v(0.6em)
+    text(weight: "bold", "Current proposed ACV: ") + " " * 9 + "_"
+    linebreak()
+    v(0.6em)
+    text(weight: "bold", "Counterparts in room: ") + " " * 9 + "_"
+  }
+)
+
+#v(0.8em)
+#appendix-section("1. Our BATNA")
+#text(size: 8.5pt, style: "italic", fill: muted)[What is our best alternative if this deal does not close? List the next-best live opportunities at similar or greater ACV.]
+
+#v(3.5cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#v(0.6em)
+#text(size: 8.5pt)[*BATNA strength:* ] #box(stroke: 0.5pt + muted, inset: 4pt, radius: 2pt)[Strong] #h(0.5em) #box(stroke: 0.5pt + muted, inset: 4pt, radius: 2pt)[Moderate] #h(0.5em) #box(stroke: 0.5pt + muted, inset: 4pt, radius: 2pt)[Weak]
+
+#v(0.3em)
+#text(size: 8pt, fill: muted, style: "italic")[A weak BATNA means you will make concessions you should not make. Address pipeline coverage before the meeting if possible.]
+
+#appendix-section("2. Their BATNA")
+#text(size: 8.5pt, style: "italic", fill: muted)[What happens to them if this deal does not close? What is driving their timeline? What are the alternatives — build, buy from a competitor, do nothing?]
+
+#v(3.5cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#appendix-section("3. Our Walk-Away Point")
+#text(size: 8.5pt, style: "italic", fill: muted)[The minimum terms at which this deal is worth doing. Be specific. Below this point, we say no.]
+
+#table(
+  columns: (2fr, 1fr, 1.5fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[Parameter]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Walk-away threshold]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Notes]),
+  [Minimum ACV], [], [],
+  [Minimum contract length], [], [],
+  [Maximum implementation commitment], [], [],
+  [Payment terms (minimum)], [], [],
+  [SLA floor], [], [],
+  [Other: ], [], [],
+)
+
+#appendix-section("4. Our Anchor Position")
+#text(size: 8.5pt, style: "italic", fill: muted)[The opening position we intend to state. It should be ambitious but defensible with reference to value delivered.]
+
+#table(
+  columns: (2fr, 1fr, 2fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[Item]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Anchor]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Rationale to state]),
+  [ACV], [], [],
+  [Contract length], [], [],
+  [Payment terms], [], [],
+  [Implementation scope], [], [],
+  [Other], [], [],
+)
+
+#appendix-section("5. Trade List")
+#text(size: 8.5pt, style: "italic", fill: muted)[What are we willing to move on, in what sequence, and what do we ask for in return? What are we not willing to move on?]
+
+#table(
+  columns: (2fr, 1.5fr, 1.5fr, 1fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[Item we can give]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Limit]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Condition (ask in return)]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Priority]),
+  [], [], [], [],
+  [], [], [], [],
+  [], [], [], [],
+  [], [], [], [],
+  [], [], [], [],
+)
+
+#v(0.5em)
+*Items we will not move on (and why):*
+
+#v(2.5cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#appendix-section("6. Anticipated Objections")
+#text(size: 8.5pt, style: "italic", fill: muted)[What objections do we expect, and how will we respond?]
+
+#table(
+  columns: (2fr, 1fr, 2.5fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[Objection]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Type (signal/decision)]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Our response]),
+  [Price is too high], [], [],
+  [Need a longer pilot], [], [],
+  [Competitor is cheaper], [], [],
+  [Need board approval first], [], [],
+  [], [], [],
+  [], [], [],
+)
+
+#appendix-section("7. Red Team Challenge")
+#text(size: 8.5pt, style: "italic", fill: muted)[To be completed by someone not on the deal team before the negotiation. One question: what is the most likely reason this deal does not close on terms we can accept?]
+
+#v(4cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#v(0.3em)
+#text(size: 8.5pt)[*Red team response from deal team:*]
+#v(3cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#appendix-section("8. Post-Negotiation Concession Log")
+#text(size: 8.5pt, style: "italic", fill: muted)[Complete after the negotiation. Track every concession made and what was received in return. Use this to improve the next negotiation.]
+
+#table(
+  columns: (0.5fr, 2fr, 2fr, 2fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[\#]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[We gave]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[We received]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Notes]),
+  [1], [], [], [],
+  [2], [], [], [],
+  [3], [], [], [],
+  [4], [], [], [],
+  [5], [], [], [],
+)
+
+#v(0.6em)
+*Final agreed terms:*
+
+#table(
+  columns: (2fr, 1fr),
+  stroke: none,
+  inset: (x: 0.6em, y: 0.5em),
+  fill: (x, y) => if y == 0 { none } else if calc.odd(y) { surface } else { none },
+  table.cell(stroke: (bottom: 1pt + accent), strong[Parameter]),
+  table.cell(stroke: (bottom: 1pt + accent), strong[Agreed value]),
+  [ACV], [],
+  [Contract length], [],
+  [Payment terms], [],
+  [Implementation scope], [],
+  [Go-live date], [],
+  [Other], [],
+)
+
+#v(0.8em)
+*What we will do differently in the next negotiation:*
+
+#v(3cm)
+#line(length: 100%, stroke: 0.4pt + muted.lighten(60%))
+
+#set text(size: 10.5pt)
 
 #v(3em)
 #align(center, {
