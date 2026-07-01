@@ -2049,6 +2049,118 @@ Use this worksheet to prepare for any significant commercial negotiation. Comple
 
 #set text(size: 10.5pt)
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// GLOSSARY
+// ═══════════════════════════════════════════════════════════════════════════════
+#pagebreak()
+#chapter-state.update("Glossary")
+
+#v(2cm)
+#text(size: 9pt, weight: "bold", fill: accent, tracking: 2pt, font: "Gill Sans")[REFERENCE]
+#v(0.4em)
+#text(size: 28pt, weight: "bold", font: "Gill Sans", fill: textcol)[Glossary]
+#v(0.3em)
+#line(length: 100%, stroke: 1.5pt + accent)
+#v(0.4em)
+#text(size: 9.5pt, fill: muted, style: "italic")[Key terms used throughout this book. Page numbers will be added in the final edition once content is stable.]
+#v(2em)
+
+#let gloss(term, defn) = {
+  grid(
+    columns: (5cm, 1fr),
+    gutter: 0em,
+    inset: (y: 0.45em),
+    {
+      text(size: 9.5pt, weight: "bold", fill: textcol, term)
+    },
+    {
+      text(size: 9.5pt, fill: textcol, defn)
+    }
+  )
+  line(length: 100%, stroke: 0.3pt + muted.lighten(50%))
+}
+
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[DEAL MECHANICS]
+#v(0.5em)
+
+#gloss("ACV", "Annual Contract Value. The annualised revenue from a contract, regardless of total term length. A three-year £300k deal has an ACV of £100k.")
+#gloss("ARR", "Annual Recurring Revenue. The annualised value of all active subscriptions at a given point in time. A company-level metric, not a deal metric.")
+#gloss("TCV", "Total Contract Value. The full value across the entire contract term. A £100k/year three-year deal has a TCV of £300k.")
+#gloss("NRE", "Non-Recurring Engineering. One-time fees for custom development, integration, or implementation work. Separate from the recurring subscription and often budgeted differently.")
+#gloss("ACV threshold", "The minimum annual contract value at which a high-touch outbound enterprise sales motion is economically viable. Approximately £50k–£100k at current labour costs; agentic tools may compress this over time.")
+#gloss("ICP", "Ideal Customer Profile. A precise description of the company and person most likely to buy, derive value, and expand. Not a market segment — a specific profile including company size, industry, buyer title, and urgency trigger.")
+#gloss("Pipeline coverage", "The ratio of pipeline value to revenue target. A win rate of 25% requires 4× pipeline coverage to have a statistical chance of hitting the target.")
+#gloss("Stage gate", "A checkpoint a deal must pass before advancing to the next stage. A stage gate is earned by meeting specific criteria — EB met, pain confirmed, success criteria agreed — not by time passing.")
+#gloss("Win rate", "The percentage of qualified opportunities that result in a closed deal. 'Qualified' is the operative word: win rate calculated from all leads is meaningless.")
+#gloss("POC / Pilot", "Proof of Concept or Pilot. A time-limited, defined evaluation with agreed success criteria. Without written success criteria, a POC has no end state and can run indefinitely.")
+#gloss("PLG", "Product-Led Growth. A go-to-market model in which the product itself drives acquisition, conversion, and expansion — typically via free trials, freemium tiers, or viral usage. Not viable as a primary motion for high-touch enterprise sales above a certain ACV threshold.")
+#gloss("Market updraft", "Organic demand that pulls customers toward a product without significant outbound effort. The exception in enterprise selling, not the rule. Building a motion that works without updraft is the only durable strategy.")
+#gloss("BATNA", "Best Alternative to a Negotiated Agreement. The course of action a party will take if the current negotiation fails. Knowing your BATNA and estimating theirs is the foundation of any commercial negotiation.")
+#gloss("ZOPA", "Zone of Possible Agreement. The range between each party's walk-away point within which a deal can be struck. If there is no ZOPA, there is no deal.")
+
+#v(1.5em)
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[MEDDPICC]
+#v(0.5em)
+
+#gloss("MEDDPICC", "Metrics, Economic Buyer, Decision Criteria, Decision Process, Paper Process, Identified Pain, Champion, Competition. A qualification framework used to assess deal health and identify gaps. Used as a diagnostic, not a checklist.")
+#gloss("Metrics", "The specific, quantified business outcomes your product moves. Not features — numbers. Revenue increased, cost reduced, risk mitigated, time saved. Metrics without an owner are vanity.")
+#gloss("Economic Buyer (EB)", "The person who can say yes when everyone else has said no, and no when everyone else has said yes. Controls the budget and is ultimately accountable for the decision. Not the person who likes your product — the person who signs.")
+#gloss("Decision Criteria", "The formal and informal criteria the buying organisation will use to evaluate vendors. Criteria you did not influence were probably written by someone — often the incumbent or a competitor.")
+#gloss("Decision Process", "The sequence of steps from verbal agreement to signed contract. Almost always takes longer than the buyer says it will. Map it explicitly and add one stage.")
+#gloss("Paper Process", "The legal, security, procurement, and compliance steps required to execute a contract. Starting it late is one of the most common causes of quarter-end slippage.")
+#gloss("Identified Pain", "The business problem the Economic Buyer is accountable for solving. Not a technical inconvenience, not a nice-to-have — a problem with a cost if it goes unsolved. Must be confirmed by the EB, not inferred.")
+#gloss("Champion", "A person inside the buying organisation who actively works to make the deal happen — arranges meetings you did not request, advocates in rooms you cannot enter, has a personal stake in the outcome. Not the same as a Sponsor.")
+#gloss("Sponsor", "A senior stakeholder who wants the deal to succeed but does not actively work it. Sponsors provide cover; champions provide traction. Confusing them is one of the most expensive mistakes in enterprise sales.")
+#gloss("Competition", "All alternatives to buying from you — including the status quo, an internal build, a different vendor, or 'not this year.' The most common competitor is the current process.")
+
+#v(1.5em)
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[PEOPLE AND ROLES]
+#v(0.5em)
+
+#gloss("Technical Buyer", "The person or team responsible for evaluating the technical fit of a solution. Has veto power but not purchase authority. A technical buyer who loves your product and an EB who has not been engaged is a stalled deal.")
+#gloss("User Buyer", "The person or team who will use the product day-to-day. Their adoption determines whether the contract renews. Often confused with the Economic Buyer.")
+#gloss("Blocker", "A stakeholder who is actively working against the deal — for political, technical, financial, or personal reasons. Must be identified and either converted or neutralised.")
+#gloss("Pre-sales / SE", "Sales Engineer or Solutions Engineer. The technical counterpart to the account executive, responsible for demonstrating product fit, running technical evaluations, and preventing the technical veto.")
+#gloss("Executive Sponsor", "A senior member of the selling organisation (often C-level) who can engage peer-to-peer with the buying organisation's senior stakeholders. Deployed sparingly; most effective when the deal needs elevation, not as a standard part of every sale.")
+
+#v(1.5em)
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[NEGOTIATION]
+#v(0.5em)
+
+#gloss("Anchor", "The first number introduced in a negotiation. Has disproportionate influence on the final outcome regardless of whether it is objectively justified. Whoever anchors first sets the reference point.")
+#gloss("Concession", "Giving something without receiving anything in return. To be avoided. Every give should be traded for something of value.")
+#gloss("Trade", "Exchanging a concession for something in return. The correct response to a price objection is not a concession but a trade: 'I can move on price if we move to a three-year term.'")
+#gloss("Walk-away price", "The point below which you will not agree to a deal. Must be determined before the negotiation begins, not during it.")
+
+#v(1.5em)
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[CONCEPTS AND METHODS]
+#v(0.5em)
+
+#gloss("Red team / Blue team", "A structured exercise in which one team member adopts the adversary's perspective (competitor, sceptical board member, procurement) to find weaknesses in a deal position before the customer finds them.")
+#gloss("War Room", "A structured team practice around a deal — pre-meeting scheming, shared action ownership, mutual challenge, debrief culture. Not a room or a tool; a discipline.")
+#gloss("Debrief culture", "The practice of analysing wins and losses systematically within two weeks of the outcome. What went right, what went wrong, what would we do differently. The practice that separates learning organisations from those that repeat the same mistakes.")
+#gloss("Status quo", "The current way of doing things — existing processes, incumbent tools, manual workarounds. The most common competitor in enterprise sales. Wins by default because switching has a visible cost and doing nothing has an invisible one.")
+#gloss("Domain playbook", "A body of specialist knowledge about a specific industry vertical — typical EB titles, procurement norms, budget cycles, competitive landscape, terminology. Used by the Salient Team Coach to give sector-specific coaching rather than generic advice.")
+#gloss("Gross margin", "Revenue minus the direct cost of delivering that revenue, expressed as a percentage. The primary indicator of business model quality. Pure SaaS: 75–85%. AI with inference cost: 60–75%. Services-heavy: 40–60%. Hardware: 40–60%, with software/services expected to become the margin engine.")
+#gloss("OEE", "Overall Equipment Effectiveness. A manufacturing metric combining availability, performance, and quality. World-class OEE is typically cited as 85%. Used as an example of the domain-specific metrics that shape EB priorities in industrial verticals.")
+
+#v(1.5em)
+#text(size: 8pt, weight: "bold", fill: accent, tracking: 1.5pt)[DOCUMENTS AND PROCESS]
+#v(0.5em)
+
+#gloss("NDA", "Non-Disclosure Agreement. A mutual confidentiality agreement protecting information shared between parties during evaluation. Should be exchanged early — before detailed technical or commercial information is shared.")
+#gloss("MSA", "Master Services Agreement. The overarching contract governing the commercial relationship, within which individual orders or SOWs are placed. Negotiated once; order forms reference it.")
+#gloss("DPA", "Data Processing Agreement. A GDPR-mandated contract governing how a processor (vendor) handles personal data on behalf of a controller (customer). Required whenever the vendor's software processes personal data. Start the DPA negotiation at the same time as the commercial proposal.")
+#gloss("RFP / ITT / RFI", "Request for Proposal / Invitation to Tender / Request for Information. Formal procurement documents used by buying organisations to solicit vendor responses. Responding to an RFP you did not influence is a low-probability activity.")
+#gloss("SOW", "Statement of Work. A document defining the specific deliverables, timelines, and responsibilities for a piece of professional services or implementation work. Referenced by the MSA.")
+
+#v(3em)
+#align(center, text(size: 8pt, fill: muted, style: "italic", "Index to follow in the final edition once content and pagination are stable."))
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COLOPHON
+// ═══════════════════════════════════════════════════════════════════════════════
+
 #v(3em)
 #align(center, {
   line(length: 20%, stroke: 0.5pt + muted)
