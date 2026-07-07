@@ -65,6 +65,16 @@ export default async function DealDetailPage({
   const { data: profileRaw } = await db.from("users").select("organization_id").eq("id", user.id).single();
   const orgId = (profileRaw as { organization_id: string } | null)?.organization_id ?? "";
 
+  // Active market segments for the deal→segment picker (empty until migration 015 is applied)
+  const { data: segRaw } = await db
+    .from("market_segments")
+    .select("id, label, kind, confidence")
+    .eq("organization_id", orgId)
+    .eq("status", "active")
+    .order("kind", { ascending: true })
+    .order("confidence", { ascending: false });
+  const segments = (segRaw ?? []) as { id: string; label: string; kind: "core" | "adjacent"; confidence: number }[];
+
   return (
     <DealDetailClient
       deal={deal}
@@ -72,6 +82,7 @@ export default async function DealDetailPage({
       expansionDeals={expansionDeals}
       dealActions={dealActions}
       orgId={orgId}
+      segments={segments}
     />
   );
 }

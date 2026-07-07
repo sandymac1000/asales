@@ -26,15 +26,18 @@ import type { DealFull, DealAction, Stage, Health, ActivityType } from "@/lib/su
 import type { DebriefResult } from "@/lib/agents/debrief";
 import type { QualificationResult } from "@/lib/agents/qualify";
 
+type SegmentOption = { id: string; label: string; kind: "core" | "adjacent"; confidence: number };
+
 interface Props {
   deal: DealFull
   currentUserId: string
   expansionDeals?: { id: string; name: string }[]
   dealActions?: DealAction[]
   orgId?: string
+  segments?: SegmentOption[]
 }
 
-export function DealDetailClient({ deal: initial, currentUserId, expansionDeals = [], dealActions: initialActions = [], orgId = "" }: Props) {
+export function DealDetailClient({ deal: initial, currentUserId, expansionDeals = [], dealActions: initialActions = [], orgId = "", segments = [] }: Props) {
   const router = useRouter();
   const features = useFeatures();
   const [deal, setDeal] = useState(initial);
@@ -432,6 +435,13 @@ export function DealDetailClient({ deal: initial, currentUserId, expansionDeals 
               saving={saving === "success_criteria"}
             />
 
+            <SegmentField
+              segments={segments}
+              value={deal.segment_id}
+              saving={saving === "segment_id"}
+              onSave={(v) => updateField("segment_id", v)}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <EditableField
                 label="ACV"
@@ -822,6 +832,58 @@ function getStageGateWarnings(deal: DealFull, newStage: Stage, liteEnabled: bool
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+function SegmentField({
+  segments,
+  value,
+  saving,
+  onSave,
+}: {
+  segments: SegmentOption[]
+  value: string | null
+  saving: boolean
+  onSave: (v: string | null) => void
+}) {
+  const selected = segments.find((s) => s.id === value) ?? null;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Buyer segment this deal tests
+        </label>
+        <ConceptBadge slug="ideal_customer_profile" />
+        {saving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+      </div>
+
+      {segments.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          No segments yet — map your core ICP and adjacent buyers in{" "}
+          <Link href="/settings" className="text-accent hover:underline">Settings → Market &amp; buyers</Link>, then tag deals here to learn which buyers convert.
+        </p>
+      ) : (
+        <>
+          <select
+            value={value ?? ""}
+            onChange={(e) => onSave(e.target.value || null)}
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">— Unassigned —</option>
+            {segments.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label} · {s.kind === "core" ? "Core" : "Adjacent"} · {s.confidence}%
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            {selected
+              ? `When this deal is won or lost, ${selected.label}'s confidence (now ${selected.confidence}%) shifts — that's how the model learns which buyers actually convert.`
+              : "Tag the buyer type this deal tests. When it is won or lost, that segment's confidence updates automatically."}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 
 function ActivityItem({ activity }: { activity: import("@/lib/supabase/types").Activity & { contact?: import("@/lib/supabase/types").Contact | null } }) {
   const [expanded, setExpanded] = useState(false);
