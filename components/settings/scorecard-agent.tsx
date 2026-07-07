@@ -8,7 +8,7 @@ type Message = { role: "user" | "assistant"; content: string };
 
 const OPENER_NEW: Message = {
   role: "assistant",
-  content: "Let's build your MEDDPICC value narrative — this will help you and the Team Coach speak consistently about what your product actually delivers.\n\nStart simple: what does your product do, and who is the most natural first buyer?",
+  content: "Let's build your value narrative — the clearest account of what your product is worth and to whom. It's what makes your Team Coach genuinely good, and as a by-product it seeds the MEDDPICC baseline your deal process runs on.\n\nTo start, in your own words: what does your product do, what problem does it solve and for whom — and if you can, what does that problem cost them today?",
 };
 
 const OPENER_REVISIT: Message = {
@@ -225,7 +225,7 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
             }}
             placeholder={hasExisting
               ? "What's changed? Or say 'nothing changed' to confirm and close out…"
-              : "Describe your product… (Enter to send, Shift+Enter for newline)"
+              : "What does your product do, who has the problem it solves, and what does it cost them?… (Enter to send, Shift+Enter for newline)"
             }
             rows={2}
             disabled={streaming}
