@@ -140,7 +140,9 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Talk it through below, then <span className="text-foreground font-medium">Write it up</span> to turn the conversation into a saveable narrative. A rough first pass is fine — you can refine and re-save anytime. Only the saved narrative trains your coach; the chat itself isn&apos;t stored.
+        Talk it through below, then{" "}
+        <span className="text-foreground font-medium">Write it up</span>{" "}
+        to turn the conversation into a saveable narrative. A rough first pass is fine — you can refine and re-save anytime. Only the saved narrative trains your coach; the chat itself isn&apos;t stored.
       </p>
       {/* Updated narrative ready to save */}
       {showUpdatedContext && context && (
@@ -188,15 +190,15 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {messages.length >= 3 && !streaming && (
-              <button
-                onClick={() => send("Based on what we've covered so far, write my value narrative now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
-                className="flex items-center gap-1 text-xs text-accent hover:underline"
-              >
-                <FileText className="h-3 w-3" />
-                Write it up
-              </button>
-            )}
+            <button
+              onClick={() => send("Based on what we've covered so far, write my value narrative now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
+              disabled={streaming || messages.length < 3}
+              title={messages.length < 3 ? "Chat a little first, then write it up" : "Write up a saveable narrative from the conversation"}
+              className="flex items-center gap-1 text-xs text-accent hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-default"
+            >
+              <FileText className="h-3 w-3" />
+              Write it up
+            </button>
             <span className="text-xs text-muted-foreground">Claude Opus 4.8 · paid per send</span>
             {(hasExisting || messages.length > 1) && (
               <button

@@ -162,7 +162,9 @@ export function MarketAgent({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Talk it through below, then <span className="text-foreground font-medium">Write it up</span> to turn the conversation into a saveable profile. A rough first pass is fine — you can refine and re-save anytime. Only the saved profile trains your coach and seeds your segments; the chat itself isn&apos;t stored.
+        Talk it through below, then{" "}
+        <span className="text-foreground font-medium">Write it up</span>{" "}
+        to turn the conversation into a saveable profile. A rough first pass is fine — you can refine and re-save anytime. Only the saved profile trains your coach and seeds your segments; the chat itself isn&apos;t stored.
       </p>
       {showUpdatedContext && context && (
         <div className="rounded-md border border-accent/30 bg-accent/5 p-4 space-y-3">
@@ -208,15 +210,15 @@ export function MarketAgent({
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {messages.length >= 3 && !streaming && (
-              <button
-                onClick={() => send("Based on what we've covered so far, write my full market and buyer profile now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
-                className="flex items-center gap-1 text-xs text-accent hover:underline"
-              >
-                <FileText className="h-3 w-3" />
-                Write it up
-              </button>
-            )}
+            <button
+              onClick={() => send("Based on what we've covered so far, write my full market and buyer profile now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
+              disabled={streaming || messages.length < 3}
+              title={messages.length < 3 ? "Chat a little first, then write it up" : "Write up a saveable profile from the conversation"}
+              className="flex items-center gap-1 text-xs text-accent hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-default"
+            >
+              <FileText className="h-3 w-3" />
+              Write it up
+            </button>
             <span className="text-xs text-muted-foreground">Claude · paid per send</span>
             {(hasExisting || messages.length > 1) && (
               <button
