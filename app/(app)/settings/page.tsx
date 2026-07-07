@@ -6,6 +6,7 @@ import { useOrg } from "@/lib/hooks/use-org";
 import { formatCurrency } from "@/lib/format";
 import { ScorecardAgent } from "@/components/settings/scorecard-agent";
 import { MarketAgent } from "@/components/settings/market-agent";
+import { SegmentsPanel } from "@/components/settings/segments-panel";
 import { ModelPicker } from "@/components/settings/model-picker";
 import type { Features } from "@/lib/supabase/types";
 
@@ -171,6 +172,22 @@ export default function SettingsPage() {
         </p>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <MarketAgent marketContext={(org as any).market_context ?? null} productContext={org.product_context ?? null} />
+
+        <div className="mt-6 border-t border-border pt-6">
+          <p className="text-xs text-muted-foreground mb-4">
+            From that profile, map a <span className="text-foreground">core ICP</span> plus adjacent buyers and markets — each carrying a confidence that you can tune by hand and that shifts automatically as deals in the pipeline are won or lost.
+          </p>
+          {(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const mc = ((org as any).market_context ?? "") as string;
+            const pc = (org.product_context ?? "") as string;
+            const synthInput = [
+              mc && `Market profile:\n${mc}`,
+              pc && `Product value narrative:\n${pc}`,
+            ].filter(Boolean).join("\n\n---\n\n");
+            return <SegmentsPanel canSynthesize={!!mc} synthInput={synthInput} />;
+          })()}
+        </div>
       </section>
 
       {/* Agent models */}

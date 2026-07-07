@@ -35,6 +35,39 @@ export interface Features {
   pipeline_kanban: boolean
 }
 
+export type SegmentKind = 'core' | 'adjacent'
+export type SegmentAxis = 'buyer' | 'market'
+export type SegmentStatus = 'active' | 'disproven'
+export type SegmentSource = 'agent' | 'user' | 'evidence'
+
+export interface SegmentProfile {
+  industry?: string
+  size?: string
+  geography?: string
+  buyer_title?: string
+  measured_on?: string
+  trigger?: string
+  champion?: string
+  objections?: string
+  terminology?: string
+}
+
+export interface MarketSegment {
+  id: string
+  organization_id: string
+  kind: SegmentKind
+  axis: SegmentAxis
+  label: string
+  profile: SegmentProfile
+  confidence: number
+  confidence_rationale: string | null
+  evidence_count: number
+  status: SegmentStatus
+  source: SegmentSource
+  created_at: string
+  updated_at: string
+}
+
 export interface User {
   id: string
   organization_id: string
@@ -81,6 +114,7 @@ export interface Deal {
   stage: Stage
   type: DealType
   parent_deal_id: string | null
+  segment_id: string | null
   // Tier 0
   economic_buyer_contact_id: string | null
   economic_buyer_met: boolean
@@ -215,6 +249,7 @@ export type Database = {
       deal_contacts: { Row: DealContact; Insert: Partial<DealContact>; Update: Partial<DealContact> }
       activities: { Row: Activity; Insert: Partial<Activity>; Update: Partial<Activity> }
       concepts: { Row: Concept; Insert: Partial<Concept>; Update: Partial<Concept> }
+      market_segments: { Row: MarketSegment; Insert: Partial<MarketSegment>; Update: Partial<MarketSegment> }
     }
   }
 }
