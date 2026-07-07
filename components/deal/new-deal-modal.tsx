@@ -68,26 +68,32 @@ export function NewDealModal({ onClose, prefillAccountId }: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
 
-      // Create account if new
+      // Resolve the account. A real selection is a UUID; "__new__" (from the
+      // dropdown) or "" (bare-input branch when the org has no accounts yet)
+      // both mean "create from the typed name".
       let resolvedAccountId = accountId;
-      if (!accountId && newAccountName) {
+      if (accountId === "__new__" || accountId === "") {
+        const name = newAccountName.trim();
+        if (!name) throw new Error("Enter a company name");
         const { data: newAccount, error: accountError } = await db
           .from("accounts")
-          .insert({ name: newAccountName, organization_id: org.id })
+          .insert({ name, organization_id: org.id })
           .select()
           .single();
         if (accountError) throw new Error("Failed to create account");
         resolvedAccountId = newAccount.id;
       }
 
-      // Create EB contact if new
-      let resolvedEbId: string | null = ebContactId || null;
-      if (!ebContactId && newEbName) {
+      // Resolve the EB: an existing contact, or create one from the typed
+      // fields. Never let the "__new__" sentinel reach the deal insert.
+      let resolvedEbId: string | null =
+        ebContactId && ebContactId !== "__new__" ? ebContactId : null;
+      if (!resolvedEbId && newEbName.trim()) {
         const { data: newContact, error: contactError } = await db
           .from("contacts")
           .insert({
-            name: newEbName,
-            title: newEbTitle || null,
+            name: newEbName.trim(),
+            title: newEbTitle.trim() || null,
             account_id: resolvedAccountId,
             organization_id: org.id,
           })
@@ -193,7 +199,7 @@ export function NewDealModal({ onClose, prefillAccountId }: Props) {
                     type="text"
                     placeholder="Company name"
                     value={newAccountName}
-                    onChange={(e) => { setNewAccountName(e.target.value); setAccountId(""); }}
+                    onChange={(e) => setNewAccountName(e.target.value)}
                     className={INPUT}
                     autoFocus
                   />
@@ -340,7 +346,11 @@ export function NewDealModal({ onClose, prefillAccountId }: Props) {
             </button>
             <button
               type="submit"
-              disabled={saving || (!accountId && !newAccountName) || !dealName}
+              disabled={
+                saving ||
+                !dealName.trim() ||
+                !((accountId && accountId !== "__new__") || newAccountName.trim())
+              }
               className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {saving ? "Creating…" : "Create deal"}
