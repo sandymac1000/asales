@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { DealFull, Health } from "@/lib/supabase/types";
 
-const client = new Anthropic();
-
 export interface DebriefUpdate {
   field: string
   new_value: string
@@ -159,13 +157,14 @@ IMPORTANT RULES:
 }
 
 export async function runDebriefAgent(
+  anthropic: Anthropic,
   deal: DealFull,
   transcript: string,
   model = "claude-opus-4-8",
 ): Promise<DebriefResult> {
   // thinking: adaptive is only supported on Opus models
   const useThinking = model.includes("opus");
-  const response = await client.messages.create({
+  const response = await anthropic.messages.create({
     model,
     max_tokens: 8000,
     ...(useThinking ? { thinking: { type: "adaptive" as const } } : {}),

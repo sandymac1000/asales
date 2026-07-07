@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,11 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Stash the invite code so /join can claim it after the magic-link round-trip.
+    if (inviteCode.trim()) {
+      localStorage.setItem("salient_invite", inviteCode.trim());
+    }
 
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
@@ -85,6 +91,30 @@ export default function LoginPage() {
                 "
                 disabled={loading}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="invite" className="text-sm font-medium text-foreground">
+                Invite code{" "}
+                <span className="font-normal text-muted-foreground">(first time only)</span>
+              </label>
+              <input
+                id="invite"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                placeholder="Paste the code from your invite"
+                className="
+                  w-full rounded-md border border-border bg-background px-3 py-2
+                  text-sm text-foreground placeholder:text-muted-foreground
+                  focus:outline-none focus:ring-2 focus:ring-ring
+                  disabled:opacity-50
+                "
+                disabled={loading}
+              />
+              <p className="text-xs text-muted-foreground">
+                New here? Enter the code your organisation was given. Already a member? Leave it blank.
+              </p>
             </div>
 
             {error && (

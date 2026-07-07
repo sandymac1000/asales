@@ -250,6 +250,22 @@ export type Database = {
       activities: { Row: Activity; Insert: Partial<Activity>; Update: Partial<Activity> }
       concepts: { Row: Concept; Insert: Partial<Concept>; Update: Partial<Concept> }
       market_segments: { Row: MarketSegment; Insert: Partial<MarketSegment>; Update: Partial<MarketSegment> }
+      org_invites: { Row: OrgInvite; Insert: Partial<OrgInvite>; Update: Partial<OrgInvite> }
+      org_secrets: { Row: OrgSecret; Insert: Partial<OrgSecret>; Update: Partial<OrgSecret> }
     }
   }
+}
+
+export interface OrgInvite {
+  code: string
+  organization_id: string
+  label: string | null
+  created_at: string
+}
+
+export interface OrgSecret {
+  organization_id: string
+  anthropic_key_ciphertext: string | null
+  anthropic_key_last4: string | null
+  updated_at: string
 }

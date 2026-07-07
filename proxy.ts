@@ -43,6 +43,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Org-membership gate (page navigations only — API routes resolve their own
+  // org and would only add a second DB round-trip here). A user who has
+  // authenticated but not yet claimed an invite has no org and must go to /join.
+  if (!pathname.startsWith("/api") && !pathname.startsWith("/join")) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("organization_id")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!(profile as { organization_id: string } | null)?.organization_id) {
+      const joinUrl = request.nextUrl.clone();
+      joinUrl.pathname = "/join";
+      return NextResponse.redirect(joinUrl);
+    }
+  }
+
   return supabaseResponse;
 }
 

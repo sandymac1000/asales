@@ -1,10 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { buildCoachContext, estimateTokens, estimateCost } from "@/lib/agents/coach-context";
 import { detectVertical, getPlaybook } from "@/lib/agents/domain-playbooks";
+import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 import type { DealFull } from "@/lib/supabase/types";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const BASE_SYSTEM = `You are a senior B2B enterprise sales coach. You have spent 20 years in the room with technical founders learning to sell. You know what good looks like and you say so.
 
@@ -79,6 +77,16 @@ export async function POST(req: Request) {
   const productContext = org?.product_context ?? null;
   const marketContext = org?.market_context ?? null;
   const coachModel = org?.agent_models?.coach ?? "claude-opus-4-8";
+
+  // Resolve the org's own Anthropic key (never the app owner's).
+  const coachOrgId = (deal as unknown as { organization_id: string }).organization_id;
+  let anthropic;
+  try {
+    anthropic = await getOrgAnthropic(coachOrgId);
+  } catch (e) {
+    if (e instanceof NoKeyError) return noKeyResponse();
+    throw e;
+  }
 
   // Auto-detect vertical from product context and inject domain playbook
   let systemPrompt = BASE_SYSTEM;

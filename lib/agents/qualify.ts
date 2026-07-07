@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Deal } from "@/lib/supabase/types";
 
-const client = new Anthropic();
-
 export interface QualificationResult {
   score: number              // 0–100
   confidence: number         // 0–1
@@ -91,13 +89,14 @@ Compute the score. Be conservative — it is better to flag risk early than to v
 }
 
 export async function runQualificationAgent(
+  anthropic: Anthropic,
   deal: Deal,
   fieldAges: Record<string, number>,
   model = "claude-sonnet-4-6",
 ): Promise<QualificationResult> {
   const dealWithAges: DealWithStaleness = { ...deal, field_ages: fieldAges };
 
-  const response = await client.messages.create({
+  const response = await anthropic.messages.create({
     model,
     max_tokens: 2000,
     tools: [SCORING_TOOL],

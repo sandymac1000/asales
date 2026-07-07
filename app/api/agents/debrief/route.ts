@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { runDebriefAgent } from "@/lib/agents/debrief";
+import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 import type { DealFull } from "@/lib/supabase/types";
 
 export async function POST(request: NextRequest) {
@@ -52,8 +53,17 @@ export async function POST(request: NextRequest) {
     if (agentModels?.debrief) debriefModel = agentModels.debrief;
   }
 
+  if (!orgId) return NextResponse.json({ error: "No organization" }, { status: 400 });
+  let anthropic;
   try {
-    const result = await runDebriefAgent(deal, transcript, debriefModel);
+    anthropic = await getOrgAnthropic(orgId);
+  } catch (e) {
+    if (e instanceof NoKeyError) return noKeyResponse();
+    throw e;
+  }
+
+  try {
+    const result = await runDebriefAgent(anthropic, deal, transcript, debriefModel);
     return NextResponse.json(result);
   } catch (err) {
     console.error("Debrief agent error:", err);

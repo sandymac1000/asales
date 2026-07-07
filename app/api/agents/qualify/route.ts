@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { runQualificationAgent } from "@/lib/agents/qualify";
+import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 import type { Deal, Activity } from "@/lib/supabase/types";
 
 const MEDDPICC_FIELDS = [
@@ -75,8 +76,17 @@ export async function POST(request: NextRequest) {
     if (agentModels?.qualify) qualifyModel = agentModels.qualify;
   }
 
+  if (!orgId) return NextResponse.json({ error: "No organization" }, { status: 400 });
+  let anthropic;
   try {
-    const result = await runQualificationAgent(deal, fieldAges, qualifyModel);
+    anthropic = await getOrgAnthropic(orgId);
+  } catch (e) {
+    if (e instanceof NoKeyError) return noKeyResponse();
+    throw e;
+  }
+
+  try {
+    const result = await runQualificationAgent(anthropic, deal, fieldAges, qualifyModel);
 
     // Persist score to deal
     await db

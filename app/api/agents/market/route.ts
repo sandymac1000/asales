@@ -1,7 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 
 const SYSTEM = `You are an expert at helping technical founders articulate their target market and ideal buyer profile for enterprise sales coaching purposes.
 
@@ -164,6 +162,15 @@ export async function POST(req: Request) {
   const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
   const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
   if (agentModels?.scorecard) marketModel = agentModels.scorecard;
+
+  // Resolve the org's own Anthropic key (both remaining paths call the model).
+  let anthropic;
+  try {
+    anthropic = await getOrgAnthropic(orgId);
+  } catch (e) {
+    if (e instanceof NoKeyError) return noKeyResponse();
+    throw e;
+  }
 
   // ── Synthesize structured segments from the conversation / saved profile ────
   if (action === "synthesize") {

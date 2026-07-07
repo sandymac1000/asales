@@ -1,7 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 
 const SYSTEM = `You are an expert at helping technical founders understand and articulate the business value of their product in enterprise sales contexts.
 
@@ -65,6 +63,16 @@ export async function POST(req: Request) {
     const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
     const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
     if (agentModels?.scorecard) scorecardModel = agentModels.scorecard;
+  }
+
+  // Resolve the org's own Anthropic key (never the app owner's).
+  if (!orgId) return new Response("No organization", { status: 400 });
+  let anthropic;
+  try {
+    anthropic = await getOrgAnthropic(orgId);
+  } catch (e) {
+    if (e instanceof NoKeyError) return noKeyResponse();
+    throw e;
   }
 
   // Stream the conversation
