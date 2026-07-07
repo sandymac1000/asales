@@ -31,7 +31,8 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = bottomRef.current?.parentElement;
+    if (c) c.scrollTop = c.scrollHeight;
   }, [messages, streaming]);
 
   async function send() {

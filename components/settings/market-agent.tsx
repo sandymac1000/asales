@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Map, Save, RotateCcw, RefreshCw } from "lucide-react";
+import { Send, Map, Save, RotateCcw, RefreshCw, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -37,11 +37,12 @@ export function MarketAgent({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = bottomRef.current?.parentElement;
+    if (c) c.scrollTop = c.scrollHeight;
   }, [messages, streaming]);
 
-  async function send() {
-    const text = input.trim();
+  async function send(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || streaming) return;
 
     // For revisit mode, inject the existing market context in the first user turn
@@ -160,6 +161,9 @@ export function MarketAgent({
   // ── Chat mode ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Talk your market through below, then <span className="text-foreground font-medium">save the profile</span> — that written summary is what trains your coach and seeds your segments. The conversation itself isn&apos;t stored.
+      </p>
       {showUpdatedContext && context && (
         <div className="rounded-md border border-accent/30 bg-accent/5 p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -203,6 +207,15 @@ export function MarketAgent({
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {messages.length >= 3 && !streaming && (
+              <button
+                onClick={() => send("Based on everything we've covered, please write my full market and buyer profile now, using the section headers.")}
+                className="flex items-center gap-1 text-xs text-accent hover:underline"
+              >
+                <FileText className="h-3 w-3" />
+                Write the profile
+              </button>
+            )}
             <span className="text-xs text-muted-foreground">Claude · paid per send</span>
             {(hasExisting || messages.length > 1) && (
               <button
@@ -251,7 +264,7 @@ export function MarketAgent({
             className="flex-1 resize-none rounded border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={streaming || !input.trim()}
             className="self-end px-3 py-2 rounded bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-90 transition-opacity"
           >

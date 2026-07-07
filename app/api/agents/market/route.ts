@@ -169,7 +169,7 @@ export async function POST(req: Request) {
   if (action === "synthesize") {
     const resp = await anthropic.messages.create({
       model: marketModel,
-      max_tokens: 2000,
+      max_tokens: 4096,
       system: SYNTH_SYSTEM,
       messages: messages && messages.length ? messages : [{ role: "user", content: "No conversation supplied." }],
     });
@@ -217,9 +217,11 @@ export async function POST(req: Request) {
   }
 
   // ── Default: stream the coaching dialogue ──────────────────────────────────
+  // 4096 (not 1024) so the final multi-section profile write-up isn't truncated;
+  // normal Q&A turns are short and only bill for tokens actually produced.
   const stream = await anthropic.messages.stream({
     model: marketModel,
-    max_tokens: 1024,
+    max_tokens: 4096,
     system: SYSTEM,
     messages: messages ?? [],
   });

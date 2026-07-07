@@ -45,7 +45,8 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
   }, [dealId]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = bottomRef.current?.parentElement;
+    if (c) c.scrollTop = c.scrollHeight;
   }, [messages, streaming]);
 
   const costPerExchange = contextTokens != null
