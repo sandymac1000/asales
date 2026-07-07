@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Save, RotateCcw, RefreshCw } from "lucide-react";
+import { Send, Sparkles, Save, RotateCcw, RefreshCw, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -35,8 +35,8 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
     if (c) c.scrollTop = c.scrollHeight;
   }, [messages, streaming]);
 
-  async function send() {
-    const text = input.trim();
+  async function send(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || streaming) return;
 
     // For revisit mode, inject the existing narrative as context in the first user turn
@@ -139,6 +139,9 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
   // ── Chat mode ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Talk it through below, then <span className="text-foreground font-medium">Write it up</span> to turn the conversation into a saveable narrative. A rough first pass is fine — you can refine and re-save anytime. Only the saved narrative trains your coach; the chat itself isn&apos;t stored.
+      </p>
       {/* Updated narrative ready to save */}
       {showUpdatedContext && context && (
         <div className="rounded-md border border-accent/30 bg-accent/5 p-4 space-y-3">
@@ -171,6 +174,7 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
             rows={12}
             className="w-full rounded border border-border bg-background px-3 py-2 text-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring resize-none"
           />
+          <p className="text-xs text-muted-foreground">This is exactly what gets saved to your org — edit it here if you like, then Save. You can revisit and refine it anytime.</p>
         </div>
       )}
 
@@ -184,6 +188,15 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {messages.length >= 3 && !streaming && (
+              <button
+                onClick={() => send("Based on what we've covered so far, write my value narrative now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
+                className="flex items-center gap-1 text-xs text-accent hover:underline"
+              >
+                <FileText className="h-3 w-3" />
+                Write it up
+              </button>
+            )}
             <span className="text-xs text-muted-foreground">Claude Opus 4.8 · paid per send</span>
             {(hasExisting || messages.length > 1) && (
               <button
@@ -232,7 +245,7 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
             className="flex-1 resize-none rounded border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={streaming || !input.trim()}
             className="self-end px-3 py-2 rounded bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-90 transition-opacity"
           >

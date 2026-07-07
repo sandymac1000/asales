@@ -8,7 +8,7 @@ type Message = { role: "user" | "assistant"; content: string };
 
 const OPENER_NEW: Message = {
   role: "assistant",
-  content: "Let's build your market and buyer profile — this trains your coach to give advice that's specific to your sector and the people you're actually selling to.\n\nStart with your target market: what industry are you primarily focused on, and what size of company are you selling into?",
+  content: "Let's build your market and buyer profile — it trains your coach to give advice specific to your sector and the people you actually sell to.\n\nTo start, paint the picture: what industry and size of company are you selling into, who's the buyer you're aiming at (their title), and what tends to make them act — the trigger that turns interest into urgency?",
 };
 
 const OPENER_REVISIT: Message = {
@@ -162,7 +162,7 @@ export function MarketAgent({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Talk your market through below, then <span className="text-foreground font-medium">save the profile</span> — that written summary is what trains your coach and seeds your segments. The conversation itself isn&apos;t stored.
+        Talk it through below, then <span className="text-foreground font-medium">Write it up</span> to turn the conversation into a saveable profile. A rough first pass is fine — you can refine and re-save anytime. Only the saved profile trains your coach and seeds your segments; the chat itself isn&apos;t stored.
       </p>
       {showUpdatedContext && context && (
         <div className="rounded-md border border-accent/30 bg-accent/5 p-4 space-y-3">
@@ -195,6 +195,7 @@ export function MarketAgent({
             rows={12}
             className="w-full rounded border border-border bg-background px-3 py-2 text-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring resize-none"
           />
+          <p className="text-xs text-muted-foreground">This is exactly what gets saved to your org — edit it here if you like, then Save. You can revisit and refine it anytime.</p>
         </div>
       )}
 
@@ -209,11 +210,11 @@ export function MarketAgent({
           <div className="flex items-center gap-3">
             {messages.length >= 3 && !streaming && (
               <button
-                onClick={() => send("Based on everything we've covered, please write my full market and buyer profile now, using the section headers.")}
+                onClick={() => send("Based on what we've covered so far, write my full market and buyer profile now using the section headers. If it's still early, make sensible assumptions, flag them as assumptions, and keep it as a first pass I can refine later.")}
                 className="flex items-center gap-1 text-xs text-accent hover:underline"
               >
                 <FileText className="h-3 w-3" />
-                Write the profile
+                Write it up
               </button>
             )}
             <span className="text-xs text-muted-foreground">Claude · paid per send</span>
@@ -257,7 +258,7 @@ export function MarketAgent({
             }}
             placeholder={hasExisting
               ? "What's changed? Or say 'nothing changed' to confirm…"
-              : "Describe your target market… (Enter to send, Shift+Enter for newline)"
+              : "Your industry and company size, the buyer's title, and what triggers them to act… (Enter to send, Shift+Enter for newline)"
             }
             rows={2}
             disabled={streaming}
