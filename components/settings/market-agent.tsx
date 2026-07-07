@@ -19,9 +19,11 @@ const OPENER_REVISIT: Message = {
 export function MarketAgent({
   marketContext,
   productContext,
+  onSaved,
 }: {
   marketContext: string | null;
   productContext: string | null;
+  onSaved?: () => void;
 }) {
   const hasExisting = !!marketContext;
   const [mode, setMode] = useState<"view" | "chat">(hasExisting ? "view" : "chat");
@@ -120,6 +122,7 @@ export function MarketAgent({
     });
     setSaving(false);
     setSaved(true);
+    onSaved?.();
     setTimeout(() => setSaved(false), 3000);
   }
 

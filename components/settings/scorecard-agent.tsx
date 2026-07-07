@@ -16,7 +16,7 @@ const OPENER_REVISIT: Message = {
   content: "You have an existing value narrative. Let's see if it still holds.\n\nWhat's changed since you wrote it — your product definition, who you're targeting, what you've learned from deals won or lost, or how you're thinking about competition?\n\nIf nothing's changed and it still feels accurate, just say so and we can close out.",
 };
 
-export function ScorecardAgent({ savedContext }: { savedContext: string | null }) {
+export function ScorecardAgent({ savedContext, onSaved }: { savedContext: string | null; onSaved?: () => void }) {
   const hasExisting = !!savedContext;
   const [mode, setMode] = useState<"view" | "chat">(hasExisting ? "view" : "chat");
   const [messages, setMessages] = useState<Message[]>(
@@ -98,6 +98,7 @@ export function ScorecardAgent({ savedContext }: { savedContext: string | null }
     });
     setSaving(false);
     setSaved(true);
+    onSaved?.();
     setTimeout(() => setSaved(false), 3000);
   }
 

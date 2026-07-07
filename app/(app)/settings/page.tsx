@@ -161,7 +161,7 @@ export default function SettingsPage() {
         <p className="text-xs text-muted-foreground mb-4 -mt-2">
           Build your value narrative in a short guided conversation — what your product is worth, and to whom. This is what makes your Team Coach as good as it can be. As a by-product it also seeds your initial MEDDPICC baseline, giving the deal process a grounded starting point.
         </p>
-        <ScorecardAgent savedContext={org.product_context ?? null} />
+        <ScorecardAgent savedContext={org.product_context ?? null} onSaved={refreshOrg} />
       </section>
 
       {/* Market & buyers */}
@@ -171,7 +171,7 @@ export default function SettingsPage() {
           Build a buyer profile for your target market. The Team Coach uses this to give advice specific to your sector — EB titles, procurement norms, common objections, and the right terminology.
         </p>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <MarketAgent marketContext={(org as any).market_context ?? null} productContext={org.product_context ?? null} />
+        <MarketAgent marketContext={(org as any).market_context ?? null} productContext={org.product_context ?? null} onSaved={refreshOrg} />
 
         <div className="mt-6 border-t border-border pt-6">
           <p className="text-xs text-muted-foreground mb-4">
