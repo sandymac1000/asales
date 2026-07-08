@@ -260,7 +260,19 @@ export interface OrgInvite {
   code: string
   organization_id: string
   label: string | null
+  sent_to: string | null
+  sent_at: string | null
   created_at: string
+}
+
+export interface AdminOrgUsage {
+  organization_id: string
+  name: string
+  created_at: string
+  invite_code: string | null
+  member_count: number
+  deal_count: number
+  last_sign_in_at: string | null
 }
 
 export interface OrgSecret {

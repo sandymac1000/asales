@@ -49,6 +49,15 @@ sign-in page. The code is also shown in that org's **Settings → Team**.
 | `RESEND_API_KEY` | from resend.com |
 | `FEEDBACK_EMAIL` | where feedback emails go (your inbox) |
 | `NEXT_PUBLIC_APP_URL` | the Vercel URL |
+| `ADMIN_EMAILS` | comma-separated operator emails (you only) — unlocks `/admin` |
+| `INVITE_FROM_EMAIL` | optional; verified Resend sender for external invite emails |
+
+The **operator console** lives at `/admin` (also linked in the sidebar for admins). It shows
+per-org usage metadata (member/deal counts, last activity, invite code) and lets you provision
+orgs and email invites. It never shows deal contents or keys. Access is gated by `ADMIN_EMAILS`
+server-side; keep that list to yourself. Invite emails to external people need a verified Resend
+domain (`INVITE_FROM_EMAIL`); without it the console still creates the org and shows the code to
+share manually.
 
 `KEY_ENCRYPTION_SECRET` encrypts each org's Anthropic key at rest. **Keep it stable** —
 changing it makes stored keys undecryptable (orgs would just re-paste their key). Generate

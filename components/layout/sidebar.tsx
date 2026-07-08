@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -9,6 +10,7 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -25,6 +27,16 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { org, user } = useOrg();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/whoami")
+      .then((r) => (r.ok ? r.json() : { admin: false }))
+      .then((d) => { if (active) setIsAdmin(!!d.admin); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -66,6 +78,21 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+              pathname.startsWith("/admin")
+                ? "bg-accent text-accent-foreground font-medium"
+                : "text-foreground hover:bg-sidebar-accent hover:text-foreground"
+            )}
+          >
+            <ShieldCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Admin
+          </Link>
+        )}
       </nav>
 
       {/* Footer */}
