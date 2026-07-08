@@ -45,11 +45,14 @@ export default function LoginPage() {
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: code.trim(),
-      type: "email",
-    });
+    // Existing (confirmed) users verify as type "email"; a brand-new user's
+    // first-ever code is a signup confirmation, which verifies as type "signup".
+    // Try email first, then fall back to signup.
+    let { error } = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "email" });
+    if (error) {
+      const retry = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "signup" });
+      error = retry.error;
+    }
 
     setLoading(false);
     if (error) {
