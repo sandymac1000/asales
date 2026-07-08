@@ -24,7 +24,7 @@ async function sendInvite(to: string, orgName: string, code: string): Promise<bo
     `To get in:`,
     `1. Go to ${appUrl}`,
     `2. Enter your email and this invite code (first time only): ${code}`,
-    `3. Click the sign-in link we email you.`,
+    `3. We'll email you a sign-in code — enter it to finish.`,
     ``,
     `Your organisation: ${orgName}. Share the same code with colleagues so they join you.`,
     ``,
