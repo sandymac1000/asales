@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Copy, Check, RotateCcw, Trash2 } from "lucide-react";
 import type { AdminOrgUsage } from "@/lib/supabase/types";
 
 function fmtDate(d: string | null): string {
@@ -10,12 +11,36 @@ function fmtDate(d: string | null): string {
 }
 
 export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
+  const router = useRouter();
   const [copied, setCopied] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   function copy(code: string) {
     navigator.clipboard.writeText(code);
     setCopied(code);
     setTimeout(() => setCopied(null), 2000);
+  }
+
+  async function rotate(o: AdminOrgUsage) {
+    if (!confirm(`Rotate ${o.name}'s invite code? The old code stops working immediately.`)) return;
+    setBusy(o.organization_id);
+    await fetch("/api/admin/manage", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "rotate_code", organizationId: o.organization_id, orgName: o.name }),
+    });
+    setBusy(null);
+    router.refresh();
+  }
+
+  async function remove(o: AdminOrgUsage) {
+    if (!confirm(`Remove ${o.name}? This deletes the organisation, its members, and all its deals. This cannot be undone.`)) return;
+    setBusy(o.organization_id);
+    await fetch("/api/admin/manage", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "remove_org", organizationId: o.organization_id }),
+    });
+    setBusy(null);
+    router.refresh();
   }
 
   if (initialOrgs.length === 0) {
@@ -33,6 +58,7 @@ export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
             <th className="px-3 py-2 font-medium">Last active</th>
             <th className="px-3 py-2 font-medium">Provisioned</th>
             <th className="px-3 py-2 font-medium">Invite code</th>
+            <th className="px-3 py-2 font-medium text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -55,6 +81,24 @@ export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
                 ) : (
                   <span className="text-xs text-muted-foreground">none</span>
                 )}
+              </td>
+              <td className="px-3 py-2">
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => rotate(o)} disabled={busy === o.organization_id}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                    title="Replace the invite code"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Rotate
+                  </button>
+                  <button
+                    onClick={() => remove(o)} disabled={busy === o.organization_id}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                    title="Delete the organisation and all its data"
+                  >
+                    <Trash2 className="h-3 w-3" /> Remove
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

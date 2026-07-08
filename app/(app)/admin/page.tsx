@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { createServiceClient } from "@/lib/supabase/service";
 import { UsageTable } from "@/components/admin/usage-table";
 import { ProvisionForm } from "@/components/admin/provision-form";
+import { RemoveUser } from "@/components/admin/remove-user";
 import type { AdminOrgUsage } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,13 @@ export default async function AdminPage() {
           Organisations ({orgs.length})
         </h2>
         <UsageTable initialOrgs={orgs} />
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Remove a user
+        </h2>
+        <RemoveUser />
       </section>
     </div>
   );
