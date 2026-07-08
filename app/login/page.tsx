@@ -106,7 +106,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-xs text-muted-foreground">
-              We&apos;ll email you a 6-digit code. No password, and no link to click.
+              We&apos;ll email you a sign-in code. No password, and no link to click.
             </p>
           </form>
         ) : (
@@ -114,7 +114,7 @@ export default function LoginPage() {
             <div className="rounded-md border border-border bg-card p-4">
               <p className="text-sm font-medium text-foreground">Check your email</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                We sent a 6-digit code to <span className="font-medium text-foreground">{email}</span>. Enter it below.
+                We sent a sign-in code to <span className="font-medium text-foreground">{email}</span>. Enter it below.
               </p>
             </div>
 
@@ -122,10 +122,10 @@ export default function LoginPage() {
               <label htmlFor="code" className="text-sm font-medium text-foreground">Sign-in code</label>
               <input
                 id="code" type="text" inputMode="numeric" autoComplete="one-time-code"
-                required autoFocus maxLength={6}
+                required autoFocus maxLength={8}
                 value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                placeholder="123456"
-                className={`${INPUT} text-center text-lg tracking-[0.4em] font-mono`}
+                placeholder="Enter the code from your email"
+                className={`${INPUT} text-center text-lg tracking-[0.25em] font-mono`}
                 disabled={loading}
               />
             </div>
