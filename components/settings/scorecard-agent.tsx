@@ -64,6 +64,12 @@ export function ScorecardAgent({ savedContext, onSaved }: { savedContext: string
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: next }),
     });
+    if (res.status === 409) {
+      const d = await res.json().catch(() => ({}));
+      setMessages((prev) => [...prev, { role: "assistant", content: d.error ?? "No Anthropic key set. Add one in Settings → AI access." }]);
+      setStreaming(false);
+      return;
+    }
     if (!res.body) { setStreaming(false); return; }
 
     let assistant = "";

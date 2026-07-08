@@ -48,6 +48,7 @@ export function DealDetailClient({ deal: initial, currentUserId, expansionDeals 
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [qualData, setQualData] = useState<QualificationResult | null>(null);
   const [qualLoading, setQualLoading] = useState(false);
+  const [qualError, setQualError] = useState<string | null>(null);
   const [creatingExpansion, setCreatingExpansion] = useState(false);
   const [showWonModal, setShowWonModal] = useState(false);
   const [showLostModal, setShowLostModal] = useState(false);
@@ -121,6 +122,7 @@ export function DealDetailClient({ deal: initial, currentUserId, expansionDeals 
 
   async function runQualification() {
     setQualLoading(true);
+    setQualError(null);
     try {
       const res = await fetch("/api/agents/qualify", {
         method: "POST",
@@ -130,6 +132,9 @@ export function DealDetailClient({ deal: initial, currentUserId, expansionDeals 
       if (res.ok) {
         const data = await res.json() as QualificationResult;
         setQualData(data);
+      } else {
+        const d = await res.json().catch(() => ({} as { error?: string }));
+        setQualError(d.error ?? "Could not compute the score. Try again.");
       }
     } finally {
       setQualLoading(false);
@@ -285,6 +290,10 @@ export function DealDetailClient({ deal: initial, currentUserId, expansionDeals 
             )}
           </div>
         </div>
+
+        {qualError && (
+          <p className="mt-3 rounded-md border border-border bg-card px-4 py-2 text-xs text-destructive">{qualError}</p>
+        )}
 
         {/* AI qualification summary */}
         {qualData && (

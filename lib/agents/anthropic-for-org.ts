@@ -28,11 +28,11 @@ export async function getOrgAnthropic(orgId: string): Promise<Anthropic> {
   return new Anthropic({ apiKey: decryptSecret(ciphertext) });
 }
 
-// Helper for routes: resolve the caller's org id, then their org's client.
-// Returns { anthropic, orgId } or a Response (the caller returns it directly).
+// Standard 409 returned by every agent route when the org has no key.
+// JSON so all clients (streaming and JSON) can read { error, code } uniformly.
+export const NO_KEY_MESSAGE =
+  "No Anthropic key set for your organisation. Add one in Settings → AI access to switch the agents on.";
+
 export function noKeyResponse(): Response {
-  return new Response(
-    "Add your organisation's Anthropic API key in Settings to enable the agents.",
-    { status: 409 }
-  );
+  return Response.json({ error: NO_KEY_MESSAGE, code: "no_key" }, { status: 409 });
 }

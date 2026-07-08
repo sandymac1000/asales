@@ -53,7 +53,11 @@ export function SegmentsPanel({
           messages: [{ role: "user", content: synthInput }],
         }),
       });
-      if (!res.ok) { setError(await res.text()); return; }
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as { error?: string }));
+        setError(d.error ?? "Something went wrong generating segments.");
+        return;
+      }
       const { segments } = await res.json();
       setSegments(segments);
     } catch {

@@ -82,6 +82,11 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
         signal: abortRef.current.signal,
       });
 
+      if (res.status === 409) {
+        const d = await res.json().catch(() => ({}));
+        setStreaming(d.error ?? "No Anthropic key set. Add one in Settings → AI access.");
+        return;
+      }
       if (!res.ok || !res.body) throw new Error("Stream error");
 
       const reader = res.body.getReader();
