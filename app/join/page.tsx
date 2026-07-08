@@ -15,17 +15,29 @@ export default function JoinPage() {
     if (!invite) return;
     setStatus("working");
     setError(null);
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("claim_invite", { invite_code: invite });
-    if (error || !data) {
+    try {
+      const supabase = createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc("claim_invite", { invite_code: invite });
+      if (error) {
+        setStatus("error");
+        setError(error.message || "That invite code wasn't recognised. Check it and try again.");
+        localStorage.removeItem("salient_invite");
+        return;
+      }
+      if (!data) {
+        setStatus("error");
+        setError("That invite code wasn't recognised. Check it and try again.");
+        localStorage.removeItem("salient_invite");
+        return;
+      }
+      localStorage.removeItem("salient_invite");
+      router.push("/pipeline");
+      router.refresh();
+    } catch (e) {
       setStatus("error");
-      setError("That invite code wasn't recognised. Check it and try again.");
-      return;
+      setError((e as Error)?.message || "Something went wrong joining. Please try again.");
     }
-    localStorage.removeItem("salient_invite");
-    router.push("/pipeline");
-    router.refresh();
   }, [router]);
 
   // Auto-claim if the code was stashed at login (same-browser magic-link flow).
