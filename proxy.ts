@@ -3,6 +3,24 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/auth/callback"];
 
+/**
+ * Redirect while keeping the cookies Supabase set on this request.
+ *
+ * `getUser()` may rotate the session (or clear it, when the refresh token is
+ * dead) via the `setAll` hook below. A bare NextResponse.redirect() throws
+ * those away, so the browser keeps replaying the same stale token on every
+ * request: the user is bounced to /login for ever and can only recover by
+ * clearing site data by hand. Copying the cookies onto the redirect is what
+ * lets a dead session actually die.
+ */
+function redirectTo(pathname: string, request: NextRequest, carry: NextResponse) {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  const response = NextResponse.redirect(url);
+  for (const cookie of carry.cookies.getAll()) response.cookies.set(cookie);
+  return response;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -38,9 +56,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
+    return redirectTo("/login", request, supabaseResponse);
   }
 
   // Org-membership gate (page navigations only — API routes resolve their own
@@ -53,9 +69,7 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
     if (!(profile as { organization_id: string } | null)?.organization_id) {
-      const joinUrl = request.nextUrl.clone();
-      joinUrl.pathname = "/join";
-      return NextResponse.redirect(joinUrl);
+      return redirectTo("/join", request, supabaseResponse);
     }
   }
 
