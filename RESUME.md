@@ -8,20 +8,37 @@ Snapshot for picking work back up.
 
 ## Status on 2026-09-30 — everything is applied, pushed and verified live
 
-Migrations **019 and 020 are applied** to the production Supabase project, all
-five commits are **pushed**, Vercel has deployed, and the features were checked
-in the live app:
+Migrations **019, 020 and 021** are applied to production, all commits are
+**pushed and deployed**, and each feature was checked in the live app:
 
-- `/start` renders and reads production correctly (all four steps green for
+- `/start` renders and reads production correctly (four steps green for
   Sandymac, demo door offered)
 - `/admin` adoption chart draws real data — cumulative members 1→5, deals 3→4,
   weekly from 29 Jun to 20 Jul
-- Settings → AI access shows the spend panel ("$0.00 across 0 agent calls",
-  correct — metering only starts counting now) and the key-capping guidance
-- Verified in the DB: all four 019 views + `admin_org_spend`, `agent_usage`
-  with RLS on and exactly one SELECT policy, `is_demo` on `deals` and
-  `accounts`, `demo_seeded_at` on `organizations`, no `anon`/`authenticated`
-  grants on any admin view, and `admin_org_usage` unchanged in shape (9 orgs)
+- Settings → AI access shows the spend panel and the key-capping guidance
+- Coach playbook resolution verified live via the `countOnly` endpoint:
+  returns all nine verticals including the new Software & Technology one
+- DB verified: four 019 views + `admin_org_spend`, `agent_usage` with RLS and
+  one SELECT policy, `is_demo` on `deals`/`accounts`, `demo_seeded_at` on
+  `organizations`, `deals.coach_playbook`, no `anon`/`authenticated` grants on
+  any admin view, `admin_org_usage` unchanged in shape (9 orgs)
+
+### Coach domain tuning — fixed, and one thing to do next
+`detectVertical` matched keywords *inside* words over lists containing
+three-letter acronyms: "large language **mod**els" → Ministry of Defence →
+Government; "ent**erp**rises" → Manufacturing; "surveying **pra**ctices" →
+Pharma. Every AI-native founder silently got ~1,000 tokens of wrong-domain
+coaching. Now word-boundary matched, plural-aware, weighted, thresholded, and
+it returns **null** rather than guessing.
+
+Tuning also moved from the org to the deal (`resolvePlaybook` cascade:
+explicit override → deal's segment → account industry → product context).
+
+**Next action:** the better rungs of that cascade are mostly empty —
+**0 of 3 accounts have `industry` set**, and only 2 of 4 deals are tagged to a
+segment (5 segments exist). So live deals currently resolve on the weakest
+signal, the org product description. Filling in account industries is the
+cheapest quality win available to the coach.
 
 ### One thing that will never work on this project
 `auth.audit_log_entries` is **completely empty — 0 rows**. Supabase has pruned
@@ -140,18 +157,36 @@ Verified on both 1.1.1.1 and 8.8.8.8.
 ---
 
 ## Next, in the order I'd take them
-1. Delete/protect the stale Vercel deployment; fix the duplicate DMARC record
-2. Grow the eval set to ~20 cases, then run it
-3. **Shared org brief** — extract product narrative + segments + ICP + targets
-   into one cached block all agents read. Fixes the caching-below-threshold
-   problem and is the prerequisite for the two new roles.
-4. **Pipeline agent** (portfolio-level: where the quarter breaks, coverage,
+1. **Fill in account industries** — 0 of 3 accounts have `industry` set, so the
+   coach's new per-deal tuning falls back to the weakest signal. Cheapest
+   quality win available.
+2. Delete/protect the stale Vercel deployment (`salientbeta-7tgdxu7cc-…`);
+   fix the duplicate DMARC record in Cloudflare
+3. Read the new Software & Technology playbook in
+   `lib/agents/domain-playbooks.ts` — ~1,000 words of domain opinion in the
+   vertical Sandy knows best, written by Claude and not yet human-reviewed
+4. Grow the debrief eval set to ~20 cases, then run it. Three sign-offs are
+   still outstanding: where cases come from, whether precision-over-recall is
+   the right weighting, and approval to spend ~$0.05–0.20 on a run
+5. **Shared org brief** — extract product narrative + segments + ICP + targets
+   into one cached block all agents read. Fixes caching-below-threshold for
+   scorecard and market, and is the prerequisite for the two new roles
+6. **Pipeline agent** (portfolio-level: where the quarter breaks, coverage,
    deals with no economic buyer) and **follow-through agent** (nothing
    currently notices every next action is overdue)
-5. Debrief UI: per-item apply. Confidence is colour-coded in
+7. Debrief UI: per-item apply. Confidence is colour-coded in
    `deal-detail-client.tsx` but "Apply updates" still applies all or nothing
+8. Decide on sign-in history: own table written at `verifyOtp`, or drop the
+   Sign-in frequency chart (the auth log is permanently empty)
 
----
+### Deliberately not built, with reasons
+- **A `set_playbook` tool for the coach.** An agent that silently rewrites its
+  own configuration mid-conversation is the failure mode we spent 30 Sep
+  fixing. The coach is instructed to *suggest* a switch and point at the
+  selector instead. If this is revisited, make it a proposal the UI renders as
+  a one-click button — model proposes, human disposes.
+- **Caching on scorecard/market.** Their prefixes are ~394 and ~643 tokens,
+  under the minimum cacheable size; a breakpoint there does nothing.
 
 ## Branch state
 - `main` — pushed and deployed, clean
