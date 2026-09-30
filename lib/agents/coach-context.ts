@@ -106,7 +106,10 @@ export function estimateTokens(text: string): number {
 }
 
 // Cost estimate in USD
-// Opus 4.8: $5/1M input, $25/1M output
+// Opus 5: $5/1M input, $25/1M output (unchanged from Opus 4.8).
+// Note: this is the uncached rate. The coach route sets a cache breakpoint on
+// the deal context, so repeat turns in a session bill most of the input at the
+// cache-read rate and cost materially less than this estimate suggests.
 export function estimateCost(inputTokens: number, outputTokens = 500): number {
   return (inputTokens * 5 + outputTokens * 25) / 1_000_000;
 }

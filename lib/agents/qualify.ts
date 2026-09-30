@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Deal } from "@/lib/supabase/types";
+import { DEFAULT_MODELS, EXTRACTION_MAX_TOKENS, DIALOGUE_EFFORT } from "@/lib/agents/models";
 
 export interface QualificationResult {
   score: number              // 0–100
@@ -92,13 +93,16 @@ export async function runQualificationAgent(
   anthropic: Anthropic,
   deal: Deal,
   fieldAges: Record<string, number>,
-  model = "claude-sonnet-4-6",
-): Promise<QualificationResult> {
+  model: string = DEFAULT_MODELS.qualify,
+): Promise<{ result: QualificationResult; usage: Anthropic.Usage }> {
   const dealWithAges: DealWithStaleness = { ...deal, field_ages: fieldAges };
 
   const response = await anthropic.messages.create({
     model,
-    max_tokens: 2000,
+    // Thinking is on by default on these models and is billed against the
+    // same ceiling, so 2000 risked spending the budget before the tool call.
+    max_tokens: EXTRACTION_MAX_TOKENS,
+    output_config: { effort: DIALOGUE_EFFORT },
     tools: [SCORING_TOOL],
     tool_choice: { type: "any" },
     messages: [
@@ -114,5 +118,5 @@ export async function runQualificationAgent(
     throw new Error("Qualification agent did not return structured output");
   }
 
-  return toolUse.input as QualificationResult;
+  return { result: toolUse.input as QualificationResult, usage: response.usage };
 }

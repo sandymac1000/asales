@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
+import { DEFAULT_MODELS, DIALOGUE_MAX_TOKENS, EXTRACTION_MAX_TOKENS, DIALOGUE_EFFORT } from "@/lib/agents/models";
+import { recordUsage, createUsageAccumulator } from "@/lib/agents/usage";
 
 const SYSTEM = `You are an expert at helping technical founders articulate their target market and ideal buyer profile for enterprise sales coaching purposes.
 
@@ -158,7 +160,7 @@ export async function POST(req: Request) {
   }
 
   // Resolve model (market agent shares the scorecard/dialogue model setting)
-  let marketModel = "claude-opus-4-8";
+  let marketModel: string = DEFAULT_MODELS.market;
   const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
   const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
   if (agentModels?.scorecard) marketModel = agentModels.scorecard;
@@ -176,10 +178,16 @@ export async function POST(req: Request) {
   if (action === "synthesize") {
     const resp = await anthropic.messages.create({
       model: marketModel,
-      max_tokens: 4096,
+      max_tokens: EXTRACTION_MAX_TOKENS,
+      output_config: { effort: DIALOGUE_EFFORT },
       system: SYNTH_SYSTEM,
       messages: messages && messages.length ? messages : [{ role: "user", content: "No conversation supplied." }],
     });
+    await recordUsage({
+      organizationId: orgId, userId: user.id, agent: "market",
+      model: marketModel, usage: resp.usage,
+    });
+
     const text = resp.content.map((b) => (b.type === "text" ? b.text : "")).join("");
 
     let parsed: { core?: SegInput; adjacencies?: SegInput[] };
@@ -228,20 +236,39 @@ export async function POST(req: Request) {
   // normal Q&A turns are short and only bill for tokens actually produced.
   const stream = await anthropic.messages.stream({
     model: marketModel,
-    max_tokens: 4096,
+    max_tokens: DIALOGUE_MAX_TOKENS,
+    output_config: { effort: DIALOGUE_EFFORT },
     system: SYSTEM,
     messages: messages ?? [],
   });
 
   const encoder = new TextEncoder();
+
+  // Usage only lands at the end of a streamed call, so accumulate it as events
+  // pass through and write one row when the stream closes.
+  const meter = createUsageAccumulator();
+  let cancelled = false;
+
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
+      try {
+        for await (const chunk of stream) {
+          meter.add(chunk);
+          if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+            controller.enqueue(encoder.encode(chunk.delta.text));
+          }
         }
+      } finally {
+        controller.close();
+        await recordUsage({
+          organizationId: orgId, userId: user.id, agent: "market",
+          model: marketModel, usage: meter.totals, partial: cancelled,
+        });
       }
-      controller.close();
+    },
+    cancel() {
+      cancelled = true;
+      stream.abort();
     },
   });
 

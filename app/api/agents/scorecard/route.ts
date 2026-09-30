@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
+import { DEFAULT_MODELS, DIALOGUE_MAX_TOKENS, DIALOGUE_EFFORT } from "@/lib/agents/models";
+import { recordUsage, createUsageAccumulator } from "@/lib/agents/usage";
 
 const SYSTEM = `You are an expert at helping technical founders understand and articulate the business value of their product in enterprise sales contexts.
 
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
   // Load org model preference
   const { data: profileForModel } = await db.from("users").select("organization_id").eq("id", user.id).single();
   const orgId = (profileForModel as { organization_id: string } | null)?.organization_id;
-  let scorecardModel = "claude-opus-4-8";
+  let scorecardModel: string = DEFAULT_MODELS.scorecard;
   if (orgId) {
     const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
     const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
@@ -78,20 +80,39 @@ export async function POST(req: Request) {
   // Stream the conversation
   const stream = await anthropic.messages.stream({
     model: scorecardModel,
-    max_tokens: 1024,
+    max_tokens: DIALOGUE_MAX_TOKENS,
+    output_config: { effort: DIALOGUE_EFFORT },
     system: SYSTEM,
     messages,
   });
 
   const encoder = new TextEncoder();
+
+  // Usage only lands at the end of a streamed call, so accumulate it as events
+  // pass through and write one row when the stream closes.
+  const meter = createUsageAccumulator();
+  let cancelled = false;
+
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
+      try {
+        for await (const chunk of stream) {
+          meter.add(chunk);
+          if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+            controller.enqueue(encoder.encode(chunk.delta.text));
+          }
         }
+      } finally {
+        controller.close();
+        await recordUsage({
+          organizationId: orgId, userId: user.id, agent: "scorecard",
+          model: scorecardModel, usage: meter.totals, partial: cancelled,
+        });
       }
-      controller.close();
+    },
+    cancel() {
+      cancelled = true;
+      stream.abort();
     },
   });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { KeyRound, Check, Trash2, Loader2 } from "lucide-react";
+import { KeyRound, Check, Trash2, Loader2, ShieldCheck } from "lucide-react";
 
 export function ApiKeyPanel() {
   const [hasKey, setHasKey] = useState<boolean | null>(null);
@@ -54,8 +54,52 @@ export function ApiKeyPanel() {
         <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" className="text-accent hover:underline">
           console.anthropic.com
         </a>{" "}
-        (this is an API key, separate from any Claude.ai plan) and revoke it there anytime.
+        (this is an API key, separate from any Claude.ai plan).
       </p>
+
+      {/* Handing an API key to someone else's software is a reasonable thing to
+          be wary of. Rather than ask to be trusted, tell people how to bound
+          what we could possibly do and how to check what we actually did. */}
+      <details className="rounded border border-border bg-background px-3 py-2">
+        <summary className="flex cursor-pointer items-center gap-2 text-xs font-medium text-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+          What we do with this key — and how to cap it
+        </summary>
+        <div className="mt-2.5 space-y-2 text-xs text-muted-foreground">
+          <p>
+            <span className="font-medium text-foreground">Put a ceiling on it before you paste it.</span>{" "}
+            In the Anthropic console, create a separate{" "}
+            <a href="https://console.anthropic.com/settings/workspaces" target="_blank" rel="noreferrer" className="text-accent hover:underline">
+              Workspace
+            </a>
+            , set a monthly spend limit on it, and create the key inside that workspace. Whatever
+            happens — bug, breach, or us — that limit is the most this key can ever spend, and your
+            main workspace is untouched. You set it; we cannot change it.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">Every call is something you clicked.</span>{" "}
+            There are no background jobs, schedulers or agent loops. You can verify that rather
+            than take our word for it: your usage graph in the Anthropic console should be flat
+            whenever nobody is using Salient.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">The key is never shown again.</span>{" "}
+            It is encrypted before storage, read only by the server when an agent runs, and never
+            sent to the browser — this page only ever sees the last four characters. Salient
+            operators can see how many deals and members an organisation has, never its key or
+            its deal contents.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">Two steps to get out.</span>{" "}
+            <em>Remove</em> below deletes our encrypted copy. That does not revoke the key —
+            only you can do that, at{" "}
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" className="text-accent hover:underline">
+              console.anthropic.com
+            </a>
+            . Do both, in that order, and nothing of yours remains here.
+          </p>
+        </div>
+      </details>
 
       {hasKey ? (
         <div className="flex items-center justify-between rounded border border-border bg-background px-3 py-2">

@@ -1,7 +1,10 @@
+import type Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { buildCoachContext, estimateTokens, estimateCost } from "@/lib/agents/coach-context";
 import { detectVertical, getPlaybook } from "@/lib/agents/domain-playbooks";
 import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
+import { DEFAULT_MODELS, DIALOGUE_MAX_TOKENS, DIALOGUE_EFFORT } from "@/lib/agents/models";
+import { recordUsage, createUsageAccumulator } from "@/lib/agents/usage";
 import type { DealFull } from "@/lib/supabase/types";
 
 const BASE_SYSTEM = `You are a senior B2B enterprise sales coach. You have spent 20 years in the room with technical founders learning to sell. You know what good looks like and you say so.
@@ -76,7 +79,7 @@ export async function POST(req: Request) {
 
   const productContext = org?.product_context ?? null;
   const marketContext = org?.market_context ?? null;
-  const coachModel = org?.agent_models?.coach ?? "claude-opus-4-8";
+  const coachModel = org?.agent_models?.coach ?? DEFAULT_MODELS.coach;
 
   // Resolve the org's own Anthropic key (never the app owner's).
   const coachOrgId = (deal as unknown as { organization_id: string }).organization_id;
@@ -106,10 +109,24 @@ export async function POST(req: Request) {
 
   // The opening exchange — seeds the conversation so the user can ask anything
   // or ask for an initial read without the model needing to re-read the context
-  const seedMessages: ChatMessage[] = [
+  //
+  // The cache breakpoint sits on the deal context, the last stable block of the
+  // prefix. Caching is a prefix match, so one breakpoint here covers the system
+  // prompt, the domain playbook (~1,000 tokens on its own) and the whole deal
+  // brief — every turn of a coaching session re-sends all of that unchanged.
+  // Cached reads bill at roughly a tenth of input, and since each org pays with
+  // its own Anthropic key, this comes straight off their bill. Everything that
+  // varies per turn (the user's actual messages) stays after the breakpoint.
+  const seedMessages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: `Here is the deal I want coaching on:\n\n${dealContext}`,
+      content: [
+        {
+          type: "text",
+          text: `Here is the deal I want coaching on:\n\n${dealContext}`,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
     },
     {
       role: "assistant",
@@ -117,7 +134,7 @@ export async function POST(req: Request) {
     },
   ];
 
-  const allMessages: ChatMessage[] = [...seedMessages, ...messages];
+  const allMessages: Anthropic.MessageParam[] = [...seedMessages, ...messages];
 
   if (countOnly) {
     const result = await anthropic.messages.countTokens({
@@ -134,27 +151,45 @@ export async function POST(req: Request) {
 
   const stream = anthropic.messages.stream({
     model: coachModel,
-    max_tokens: 1024,
+    max_tokens: DIALOGUE_MAX_TOKENS,
+    output_config: { effort: DIALOGUE_EFFORT },
     system: systemPrompt,
     messages: allMessages,
   });
 
   const encoder = new TextEncoder();
 
+  // Usage is not handed to you on a streamed call: input and cache counts
+  // arrive on message_start, output accrues on message_delta. Accumulate as
+  // events pass through and write one row once the stream ends — including
+  // when the user cancelled it, which under-reports and is flagged as partial.
+  const meter = createUsageAccumulator();
+  let cancelled = false;
+
   return new Response(
     new ReadableStream({
       async start(controller) {
-        for await (const event of stream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            controller.enqueue(encoder.encode(event.delta.text));
+        try {
+          for await (const event of stream) {
+            meter.add(event);
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              controller.enqueue(encoder.encode(event.delta.text));
+            }
           }
+        } finally {
+          controller.close();
+          // Never let metering break the response.
+          await recordUsage({
+            organizationId: coachOrgId, userId: user.id, agent: "coach",
+            model: coachModel, usage: meter.totals, dealId, partial: cancelled,
+          });
         }
-        controller.close();
       },
       cancel() {
+        cancelled = true;
         stream.abort();
       },
     }),

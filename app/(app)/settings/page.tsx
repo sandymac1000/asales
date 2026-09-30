@@ -9,6 +9,7 @@ import { MarketAgent } from "@/components/settings/market-agent";
 import { SegmentsPanel } from "@/components/settings/segments-panel";
 import { ModelPicker } from "@/components/settings/model-picker";
 import { ApiKeyPanel } from "@/components/settings/api-key-panel";
+import { UsagePanel } from "@/components/settings/usage-panel";
 import { InviteCode } from "@/components/settings/invite-code";
 import type { Features } from "@/lib/supabase/types";
 
@@ -160,8 +161,9 @@ export default function SettingsPage() {
       {/* AI access — org's own Anthropic key (gates all agents) */}
       <section className="mb-10">
         <SectionHeading>AI access</SectionHeading>
-        <div className="-mt-2">
+        <div className="-mt-2 space-y-3">
           <ApiKeyPanel />
+          <UsagePanel />
         </div>
       </section>
 

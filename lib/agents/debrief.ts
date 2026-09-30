@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { DealFull, Health } from "@/lib/supabase/types";
+import { DEFAULT_MODELS, DEBRIEF_MAX_TOKENS, MIN_DEBRIEF_CONFIDENCE } from "@/lib/agents/models";
 
 export interface DebriefUpdate {
   field: string
@@ -160,13 +161,18 @@ export async function runDebriefAgent(
   anthropic: Anthropic,
   deal: DealFull,
   transcript: string,
-  model = "claude-opus-4-8",
-): Promise<DebriefResult> {
-  // thinking: adaptive is only supported on Opus models
-  const useThinking = model.includes("opus");
+  model: string = DEFAULT_MODELS.debrief,
+): Promise<{ result: DebriefResult; usage: Anthropic.Usage }> {
+  // Adaptive thinking is supported across the current Opus and Sonnet
+  // generations, so this no longer needs to be Opus-gated. Older models that
+  // predate it would reject the parameter, so keep the guard for an org that
+  // has pinned one via agent_models.
+  const useThinking = /opus|sonnet-5/.test(model);
   const response = await anthropic.messages.create({
     model,
-    max_tokens: 8000,
+    // Deliberately no `effort` override: this is the only agent whose output
+    // is written into deal records, so it runs at the default (`high`).
+    max_tokens: DEBRIEF_MAX_TOKENS,
     ...(useThinking ? { thinking: { type: "adaptive" as const } } : {}),
     tools: [EXTRACTION_TOOL],
     tool_choice: { type: "any" },
@@ -185,5 +191,46 @@ export async function runDebriefAgent(
     throw new Error("Agent did not return structured extraction");
   }
 
-  return toolUse.input as DebriefResult;
+  return {
+    result: gateByConfidence(toolUse.input as DebriefResult),
+    usage: response.usage,
+  };
+}
+
+/**
+ * Drop extractions the model wasn't confident enough about.
+ *
+ * The system prompt already says "below 0.5 = don't include", but that is an
+ * instruction, not an enforcement — nothing stopped a 0.3 guess reaching the
+ * Apply button and being written into a deal record along with everything
+ * else. This is the same rule, applied where it can't be talked out of.
+ *
+ * New contacts carry no confidence of their own and are left alone; they are
+ * additive and visible in the review list before anything is applied.
+ */
+function gateByConfidence(result: DebriefResult): DebriefResult {
+  const keep = <T extends { confidence: number }>(items: T[] | undefined) =>
+    (items ?? []).filter(
+      (i) => typeof i.confidence === "number" && i.confidence >= MIN_DEBRIEF_CONFIDENCE,
+    );
+
+  const meddpicc_updates = keep(result.meddpicc_updates);
+  const health_updates = keep(result.health_updates);
+
+  const dropped =
+    (result.meddpicc_updates?.length ?? 0) - meddpicc_updates.length +
+    (result.health_updates?.length ?? 0) - health_updates.length;
+  if (dropped > 0) {
+    console.warn(
+      `[debrief] dropped ${dropped} extraction(s) below confidence ${MIN_DEBRIEF_CONFIDENCE}`,
+    );
+  }
+
+  return {
+    ...result,
+    meddpicc_updates,
+    health_updates,
+    new_contacts: result.new_contacts ?? [],
+    key_signals: result.key_signals ?? [],
+  };
 }

@@ -3,6 +3,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { runQualificationAgent } from "@/lib/agents/qualify";
 import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
+import { DEFAULT_MODELS } from "@/lib/agents/models";
+import { recordUsage } from "@/lib/agents/usage";
 import type { Deal, Activity } from "@/lib/supabase/types";
 
 const MEDDPICC_FIELDS = [
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest) {
   // Load org model preference
   const { data: profileRaw } = await db.from("users").select("organization_id").eq("id", user.id).single();
   const orgId = (profileRaw as { organization_id: string } | null)?.organization_id;
-  let qualifyModel = "claude-sonnet-4-6";
+  let qualifyModel: string = DEFAULT_MODELS.qualify;
   if (orgId) {
     const { data: orgRaw } = await db.from("organizations").select("agent_models").eq("id", orgId).single();
     const agentModels = (orgRaw as { agent_models: Record<string, string> | null } | null)?.agent_models;
@@ -86,7 +88,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await runQualificationAgent(anthropic, deal, fieldAges, qualifyModel);
+    const { result, usage } = await runQualificationAgent(anthropic, deal, fieldAges, qualifyModel);
+
+    await recordUsage({
+      organizationId: orgId, userId: user.id, agent: "qualify",
+      model: qualifyModel, usage, dealId: deal_id,
+    });
 
     // Persist score to deal
     await db
