@@ -1,13 +1,29 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles, MessageSquare } from "lucide-react";
+import { X, Send, Loader2, Sparkles, MessageSquare, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface CoachMessage {
   role: "user" | "assistant";
   content: string;
 }
+
+interface PlaybookInfo {
+  vertical: string | null;
+  label: string;
+  source: "override" | "segment" | "account" | "product" | "none";
+  options: Record<string, string>;
+}
+
+/** Why this playbook, in the user's words rather than the enum's. */
+const SOURCE_COPY: Record<PlaybookInfo["source"], string> = {
+  override: "you chose this for this deal",
+  segment: "matched from this deal's market segment",
+  account: "matched from this account's industry",
+  product: "matched from your product description — a weaker signal, since it describes what you sell rather than who you sell to",
+  none: "nothing matched confidently, so the coach is running on general judgement only",
+};
 
 interface Props {
   dealId: string;
@@ -28,6 +44,8 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
   const [contextTokens, setContextTokens] = useState<number | null>(null);
   const [sessionCost, setSessionCost] = useState(0);
   const [exchanges, setExchanges] = useState(0);
+  const [playbook, setPlaybook] = useState<PlaybookInfo | null>(null);
+  const [savingPlaybook, setSavingPlaybook] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -40,7 +58,7 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
       body: JSON.stringify({ dealId, messages: [], countOnly: true }),
     })
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => d && setContextTokens(d.inputTokens))
+      .then((d) => { if (d) { setContextTokens(d.inputTokens); setPlaybook(d.playbook ?? null); } })
       .catch(() => {});
   }, [dealId]);
 
@@ -52,6 +70,31 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
   const costPerExchange = contextTokens != null
     ? (contextTokens + messages.length * 100) * OPUS_INPUT_PER_TOKEN + EST_OUTPUT_TOKENS * OPUS_OUTPUT_PER_TOKEN
     : null;
+
+  async function changePlaybook(value: string) {
+    setSavingPlaybook(true);
+    try {
+      await fetch("/api/agents/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dealId, messages: [], setPlaybook: value }),
+      });
+      // Re-resolve rather than guess: the server owns the cascade, and with
+      // "auto" the resulting playbook depends on the deal, not on this choice.
+      const res = await fetch("/api/agents/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dealId, messages: [], countOnly: true }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setPlaybook(d.playbook ?? null);
+        if (d.inputTokens) setContextTokens(d.inputTokens);
+      }
+    } finally {
+      setSavingPlaybook(false);
+    }
+  }
 
   function resizeTextarea() {
     if (textareaRef.current) {
@@ -158,6 +201,34 @@ export function TeamCoachPanel({ dealId, dealName, onClose, onSaveSession }: Pro
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Which playbook is coaching this deal, and how to change it.
+              Shown rather than only answerable in chat: the chip is the
+              authoritative channel, the conversation is the discoverable one. */}
+          {playbook && (
+            <div className="mt-3 rounded-md border border-border bg-card px-2.5 py-2">
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="h-3 w-3 shrink-0 text-accent" />
+                <span className="text-[11px] font-medium text-foreground">{playbook.label}</span>
+                <select
+                  value={playbook.source === "override" ? (playbook.vertical ?? "none") : "auto"}
+                  disabled={savingPlaybook}
+                  onChange={(e) => changePlaybook(e.target.value)}
+                  className="ml-auto rounded border border-border bg-background px-1.5 py-0.5 text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+                  aria-label="Domain playbook"
+                >
+                  <option value="auto">Auto</option>
+                  {Object.entries(playbook.options).map(([id, label]) => (
+                    <option key={id} value={id}>{label}</option>
+                  ))}
+                  <option value="none">No playbook</option>
+                </select>
+              </div>
+              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
+                {SOURCE_COPY[playbook.source]}
+              </p>
+            </div>
+          )}
 
           {/* Cost indicator */}
           <div className="mt-3 rounded-md bg-muted/60 px-3 py-2 text-xs space-y-0.5">

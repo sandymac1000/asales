@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { buildCoachContext, estimateTokens, estimateCost } from "@/lib/agents/coach-context";
-import { detectVertical, getPlaybook } from "@/lib/agents/domain-playbooks";
+import { resolvePlaybook, getPlaybook, VERTICAL_LABELS } from "@/lib/agents/domain-playbooks";
 import { getOrgAnthropic, NoKeyError, noKeyResponse } from "@/lib/agents/anthropic-for-org";
 import { DEFAULT_MODELS, DIALOGUE_MAX_TOKENS, DIALOGUE_EFFORT } from "@/lib/agents/models";
 import { recordUsage, createUsageAccumulator } from "@/lib/agents/usage";
@@ -29,14 +29,24 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  const { dealId, messages, countOnly } = await req.json() as {
+  const { dealId, messages, countOnly, setPlaybook } = await req.json() as {
     dealId: string
     messages: ChatMessage[]
     countOnly?: boolean
+    /** Persist an explicit playbook choice for this deal, then return. */
+    setPlaybook?: string
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
+
+  // An explicit playbook choice is a deterministic write, deliberately not
+  // something the model can do to itself mid-conversation.
+  if (setPlaybook !== undefined) {
+    const value = setPlaybook === "auto" ? null : setPlaybook;
+    await db.from("deals").update({ coach_playbook: value }).eq("id", dealId);
+    return Response.json({ ok: true, coach_playbook: value });
+  }
 
   const { data: deal } = await db
     .from("deals")
@@ -44,6 +54,7 @@ export async function POST(req: Request) {
       *,
       account:accounts(*),
       economic_buyer:contacts(*),
+      segment:market_segments(label, profile),
       deal_contacts(*, contact:contacts(*)),
       activities(*, contact:contacts(*), user:users(*))
     `)
@@ -91,14 +102,38 @@ export async function POST(req: Request) {
     throw e;
   }
 
-  // Auto-detect vertical from product context and inject domain playbook
+  // Resolve the playbook for THIS deal, not for the org. A founder selling
+  // into two verticals needs different coaching on each.
+  const dealRow = deal as unknown as {
+    coach_playbook: string | null
+    account: { name: string | null; industry: string | null } | null
+    segment: { label: string | null; profile: string | null } | null
+  };
+  const resolved = resolvePlaybook({
+    override: dealRow.coach_playbook,
+    segmentText: [dealRow.segment?.label, dealRow.segment?.profile].filter(Boolean).join(" "),
+    accountText: [dealRow.account?.industry, dealRow.account?.name].filter(Boolean).join(" "),
+    productContext,
+  });
+
   let systemPrompt = BASE_SYSTEM;
-  if (productContext) {
-    const vertical = detectVertical(productContext);
-    if (vertical) {
-      systemPrompt += "\n\n" + getPlaybook(vertical);
-    }
+  if (resolved.vertical) {
+    systemPrompt += "\n\n" + getPlaybook(resolved.vertical);
   }
+  // Tell the coach what it is running on, so that "which playbook are you
+  // using?" gets a true answer rather than a plausible guess. Without this the
+  // model has no reliable way to know, and would confabulate one.
+  systemPrompt += `\n\n=== YOUR CURRENT TUNING ===
+Domain playbook in use: ${resolved.vertical ? VERTICAL_LABELS[resolved.vertical] : "none — you are coaching from general enterprise-sales judgement only"}.
+Chosen because: ${{
+    override: "the user set it explicitly for this deal",
+    segment: "it matches the market segment this deal is tagged to",
+    account: "it matches this account's industry",
+    product: "it matches the organisation's product description (a weaker signal — it describes what they sell, not who they sell to)",
+    none: "nothing in the deal matched a playbook confidently enough",
+  }[resolved.source]}.
+If asked which playbook or domain you are using, answer with exactly this and do not speculate beyond it. If the conversation makes clear the deal actually sits in a different domain, say so plainly and tell them they can change it above the chat — do not pretend to have switched.
+=== END TUNING ===`;
 
   const dealContext = buildCoachContext(
     deal as DealFull,
@@ -146,6 +181,12 @@ export async function POST(req: Request) {
     return Response.json({
       inputTokens,
       estimatedCostPerExchange: estimateCost(inputTokens),
+      playbook: {
+        vertical: resolved.vertical,
+        label: resolved.label,
+        source: resolved.source,
+        options: VERTICAL_LABELS,
+      },
     });
   }
 

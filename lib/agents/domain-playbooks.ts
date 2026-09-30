@@ -6,7 +6,8 @@ export type Vertical =
   | "healthcare"
   | "manufacturing"
   | "fintech"
-  | "government";
+  | "government"
+  | "software_technology";
 
 interface Playbook {
   label: string;
@@ -449,6 +450,72 @@ REAL COMPETITION:
 
 KEY TERMINOLOGY: SRO, GMPP, Gateway review, GDS, service standard, G-Cloud, Crown Commercial, NAO, PAC, Spending Review, CDDO, digital spending controls, HMT Green Book, OJEU threshold, Cyber Essentials, Government Security Classifications, OFFICIAL-SENSITIVE, UK sovereign cloud, agile delivery, alpha/beta/live`,
   },
+
+  software_technology: {
+    label: "Software & Technology",
+    keywords: [
+      "saas", "platform team", "developer", "developers", "sdk", "api-first",
+      "kubernetes", "observability", "devops", "microservices", "data platform",
+      "mlops", "inference", "foundation model", "large language model", "llm",
+      "machine learning", "embeddings", "fine-tuning", "vector database",
+      "software company", "engineering team", "technology company", "scale-up",
+      "frontier model", "language model", "model access", "tokens per second",
+      "soc 2", "iso 27001", "penetration test", "uptime", "latency",
+      "open source", "self-hosted", "multi-tenant", "developer experience",
+    ],
+    content: `DOMAIN: Software & Technology (selling to technology companies)
+
+ECONOMIC BUYERS — typical titles and what they are measured on:
+- CTO / VP Engineering: engineering velocity, cost per engineer, build-vs-buy discipline, platform reliability
+- Head of Platform / Platform Engineering Lead: developer experience, internal adoption of shared services, toil reduction
+- VP Data / Head of ML: model quality, inference cost per request, time from experiment to production
+- CISO / Head of Security: SOC 2 and ISO 27001 posture, third-party risk, customer security questionnaires
+- CFO (at scale-ups): gross margin, cloud and inference spend as a share of revenue, runway
+- At smaller companies the CTO is often all of these at once; do not invent a committee that does not exist
+
+PAIN TRIGGERS — what creates urgency:
+- Cloud or inference spend growing faster than revenue: a direct margin problem, visible to the board, and the fastest route to CFO attention
+- Engineering time spent on undifferentiated work: every hour on internal plumbing is an hour not on the product, and engineering leaders can quantify it in headcount
+- A failed enterprise security review: losing a deal for a missing SOC 2 or a failed pen test creates immediate budget for whatever unblocks it
+- An outage or latency regression that reached customers: postmortems create funded action items with named owners
+- A key engineer leaving: bus-factor risk on a home-built system is the moment "we built it ourselves" stops being a point of pride
+- A scaling wall ahead of a funding round or a large customer launch, where the deadline is external and immovable
+
+BUDGET & PROCUREMENT:
+- Usually OpEx from an engineering or platform budget, annual with monthly or consumption billing; land-and-expand is normal and expected
+- Far faster than regulated industries: weeks rather than quarters, often a card or a simple order form below a threshold (commonly $10k–$50k)
+- The security review IS the procurement process — SOC 2 Type II, a completed questionnaire, pen test summary, DPA, sub-processor list, and increasingly an AI-use addendum. Have these ready before you are asked; not having them is the most common stall in this vertical
+- Consumption pricing invites a usage-based pilot, which is a good way in — but agree the success threshold and the expansion trigger in writing, or the pilot becomes a permanent discount
+- Procurement teams appear above a revenue threshold; below it the CTO signs
+
+CHAMPION PROFILE — real vs fan:
+- Real champion: a staff or principal engineer, or a platform lead, who owns the problem, has tried to solve it internally, and can say what that cost. They run the evaluation themselves and argue your case when you are not in the room
+- Fan: an engineer who loves the technology, stars the repo, and has neither budget nor mandate. Enormously common here, and the most frequent cause of a deal that feels warm for months and never closes
+- The tell is whether they have ever killed an internal project. A champion who has retired their own code will buy; one who has not usually cannot
+- Red flag: your champion cannot describe how software actually gets bought at their company
+
+BUILD VS BUY — the defining dynamic in this vertical:
+- Every prospect can build it. They have the engineers, the conviction, and often a prototype already. Assume the real competitor is a half-finished internal version with a sponsor
+- Do not argue they cannot build it — argue what it costs to keep running. The honest frame is three-year total cost of ownership: the build, the maintenance tax, on-call burden, the opportunity cost of the two best engineers, and the migration when the author leaves
+- Engineering teams underestimate build cost by 3–5x with striking consistency. Ask what their last internal platform project was estimated at and what it actually took; let their own history make the argument
+- Your defensible ground is rarely the core algorithm. It is the integrations, the edge cases learned from other customers, the compliance evidence, and the fact that your roadmap is someone else's full-time job
+
+REAL COMPETITION:
+- The internal build, usually with an executive sponsor who proposed it
+- The incumbent cloud provider's adequate and already-paid-for equivalent — bundling is a commercial force, not a technical comparison
+- A credible open-source project plus the team's willingness to self-host; compete on operational burden, not features
+- Doing nothing, which in a cost-cutting year is the most likely outcome of all
+
+CULTURAL NORMS:
+- Technical credibility is the entry ticket and it is assessed in the first ten minutes. Send an engineer to the first technical call, not only a commercial lead
+- Marketing language is actively counterproductive. Specifics, benchmarks with methodology, and stated limitations build more trust than claims
+- Documentation and a self-serve trial are part of the sale: buyers evaluate before they talk to you, and a gated demo loses deals you never hear about
+- Reference customers with a recognisable engineering reputation outweigh larger logos
+- Do not oversell AI capability to an audience that builds it. They will test the boundary immediately, and a caught exaggeration ends the deal
+
+KEY TERMINOLOGY: SOC 2 Type II, ISO 27001, DPA, sub-processor, pen test, SSO, SAML, SCIM, RBAC, audit log, SLA, SLO, p99 latency, throughput, tokens per second, inference cost, cost per request, self-hosted, VPC deployment, air-gapped, multi-tenant, single-tenant, land-and-expand, net revenue retention, design partner, POC, build-vs-buy, platform team, developer experience, toil, on-call, bus factor`,
+  },
+
 };
 
 // Matching a keyword anywhere inside a word is how "mod" (Ministry of Defence)
@@ -463,7 +530,9 @@ function escapeRegex(s: string): string {
 function countMatches(lower: string, keywords: string[]): number {
   let score = 0;
   for (const kw of keywords) {
-    const re = new RegExp(`\\b${escapeRegex(kw)}\\b`, "i");
+    // Allow a trailing plural so "large language models" matches the
+    // keyword "large language model" — without this, ordinary phrasing misses.
+    const re = new RegExp(`\\b${escapeRegex(kw)}s?\\b`, "i");
     if (!re.test(lower)) continue;
     // A long, distinctive term ("aerospace", "airworthiness") is evidence on
     // its own; a three-letter acronym is not. Requiring MIN_SCORE means one
@@ -497,4 +566,70 @@ export function detectVertical(text: string): Vertical | null {
 export function getPlaybook(vertical: Vertical): string {
   const p = PLAYBOOKS[vertical];
   return `=== DOMAIN PLAYBOOK: ${p.label} ===\n${p.content}\n=== END PLAYBOOK ===`;
+}
+
+export const VERTICAL_LABELS: Record<Vertical, string> = Object.fromEntries(
+  (Object.entries(PLAYBOOKS) as [Vertical, Playbook][]).map(([v, p]) => [v, p.label]),
+) as Record<Vertical, string>;
+
+/** Where a playbook choice came from, so the UI can be honest about it. */
+export type PlaybookSource = "override" | "segment" | "account" | "product" | "none";
+
+export interface ResolvedPlaybook {
+  vertical: Vertical | null
+  source: PlaybookSource
+  label: string
+}
+
+export interface PlaybookInputs {
+  /** deals.coach_playbook — an explicit human choice, or "none" to suppress. */
+  override?: string | null
+  /** The market segment this deal is tagged to. */
+  segmentText?: string | null
+  /** The account's own industry and name. */
+  accountText?: string | null
+  /** The org's product description — the legacy signal, now last. */
+  productContext?: string | null
+}
+
+/**
+ * Resolve which playbook coaches this deal.
+ *
+ * The order matters and is the point of the whole change. Tuning used to read
+ * the org's product description — what the founder sells — while every
+ * playbook describes the *buyer's* world. That works only while a founder
+ * sells into the industry they came from. A founder with an aerospace deal and
+ * a pharma deal needs different coaching on each, which is what treating ICP
+ * as a portfolio means in practice.
+ *
+ * So: an explicit choice wins; then the deal's segment; then the account's
+ * industry; and only then the org's product text, kept as a fallback for deals
+ * with nothing else to go on. Nothing confident enough means no playbook.
+ */
+export function resolvePlaybook(inputs: PlaybookInputs): ResolvedPlaybook {
+  const named = (v: Vertical | null, source: PlaybookSource): ResolvedPlaybook => ({
+    vertical: v,
+    source: v ? source : "none",
+    label: v ? VERTICAL_LABELS[v] : "No domain playbook",
+  });
+
+  const override = inputs.override?.trim();
+  if (override === "none") {
+    return { vertical: null, source: "override", label: "No domain playbook (your choice)" };
+  }
+  if (override && override in PLAYBOOKS) {
+    return named(override as Vertical, "override");
+  }
+
+  for (const [text, source] of [
+    [inputs.segmentText, "segment"],
+    [inputs.accountText, "account"],
+    [inputs.productContext, "product"],
+  ] as Array<[string | null | undefined, PlaybookSource]>) {
+    if (!text?.trim()) continue;
+    const v = detectVertical(text);
+    if (v) return named(v, source);
+  }
+
+  return named(null, "none");
 }
