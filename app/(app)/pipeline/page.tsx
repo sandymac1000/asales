@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PipelineClient } from "./pipeline-client";
 import type { DealWithAccount, Health, Organization } from "@/lib/supabase/types";
 import { ACTIVE_STAGES } from "@/lib/format";
+import { getReadiness, shouldRedirectToStart } from "@/lib/onboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,12 @@ function getYearRange(now: Date) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveOrgId(db: any, userId: string): Promise<string | null> {
+  const { data } = await db.from("users").select("organization_id").eq("id", userId).single();
+  return (data as { organization_id: string } | null)?.organization_id ?? null;
+}
+
 export default async function PipelinePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -37,6 +44,33 @@ export default async function PipelinePage() {
     .select(`*, account:accounts(*), economic_buyer:contacts(*)`)
     .in("stage", ACTIVE_STAGES)
     .order("created_at", { ascending: false });
+
+  // Cold start: no real deals and no value narrative means they are at the very
+  // beginning, and the narrative is meant to come before the first deal.
+  //
+  // This lives here rather than in the proxy because the deals are already
+  // loaded — the proxy would pay a DB round-trip on every navigation, forever,
+  // to serve a one-time flow. Demo deals don't count as having started.
+  const realDealCount = ((raw ?? []) as unknown as DealWithAccount[])
+    .filter((d) => !(d as unknown as { is_demo?: boolean }).is_demo).length;
+
+  if (realDealCount === 0) {
+    const orgId = await resolveOrgId(db, user.id);
+    const { data: orgForStart } = orgId
+      ? await db.from("organizations").select("product_context").eq("id", orgId).maybeSingle()
+      : { data: null };
+
+    const readiness = getReadiness({
+      // Only the narrative and deal booleans decide this redirect; /start
+      // re-derives the full set, including the key, when it renders.
+      hasKey: true,
+      productContext: (orgForStart as { product_context: string | null } | null)?.product_context,
+      marketContext: null,
+      segmentCount: 0,
+      dealCount: 0,
+    });
+    if (shouldRedirectToStart(readiness)) redirect("/start");
+  }
 
   const deals = ((raw ?? []) as unknown as DealWithAccount[]).map((d) => ({
     ...d,

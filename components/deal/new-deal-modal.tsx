@@ -170,7 +170,7 @@ export function NewDealModal({ onClose, prefillAccountId }: Props) {
               <p className="text-xs text-foreground font-medium">Before you go deep on this deal</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Have you defined your value narrative? It takes 10 minutes and makes every coaching session sharper.{" "}
-                <Link href="/settings" className="text-accent hover:underline" onClick={onClose}>
+                <Link href="/start" className="text-accent hover:underline" onClick={onClose}>
                   Do it first →
                 </Link>
               </p>
