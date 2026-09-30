@@ -275,6 +275,39 @@ export interface AdminOrgUsage {
   last_sign_in_at: string | null
 }
 
+// Operator-console chart views (migration 019). Metadata only — counts and
+// dates, never deal contents. `day` is a UTC date string (YYYY-MM-DD).
+export interface AdminSignupsDaily {
+  organization_id: string
+  org_name: string
+  day: string
+  members: number
+}
+
+export interface AdminDealsDaily {
+  organization_id: string
+  org_name: string
+  day: string
+  deals: number
+}
+
+export type LoginRecencyBucket = 'today' | 'week' | 'month' | 'dormant' | 'never'
+
+export interface AdminLoginRecency {
+  organization_id: string
+  org_name: string
+  bucket: LoginRecencyBucket
+  users: number
+}
+
+export interface AdminLoginsDaily {
+  organization_id: string
+  org_name: string
+  day: string
+  logins: number
+  actors: number
+}
+
 export interface OrgSecret {
   organization_id: string
   anthropic_key_ciphertext: string | null

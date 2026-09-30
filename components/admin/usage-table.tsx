@@ -10,7 +10,14 @@ function fmtDate(d: string | null): string {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
+export function UsageTable({
+  initialOrgs,
+  loginsByOrg = {},
+}: {
+  initialOrgs: AdminOrgUsage[]
+  /** organization_id → sign-ins in the last 30 days (migration 019). */
+  loginsByOrg?: Record<string, number>
+}) {
   const router = useRouter();
   const [copied, setCopied] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -55,6 +62,9 @@ export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
             <th className="px-3 py-2 font-medium">Organisation</th>
             <th className="px-3 py-2 font-medium text-right">Members</th>
             <th className="px-3 py-2 font-medium text-right">Deals</th>
+            <th className="px-3 py-2 font-medium text-right" title="Sign-ins in the last 30 days, as far back as the auth log is retained">
+              Sign-ins 30d
+            </th>
             <th className="px-3 py-2 font-medium">Last active</th>
             <th className="px-3 py-2 font-medium">Provisioned</th>
             <th className="px-3 py-2 font-medium">Invite code</th>
@@ -67,6 +77,9 @@ export function UsageTable({ initialOrgs }: { initialOrgs: AdminOrgUsage[] }) {
               <td className="px-3 py-2 text-foreground">{o.name}</td>
               <td className="px-3 py-2 text-right font-mono text-foreground">{o.member_count}</td>
               <td className="px-3 py-2 text-right font-mono text-foreground">{o.deal_count}</td>
+              <td className="px-3 py-2 text-right font-mono text-muted-foreground">
+                {loginsByOrg[o.organization_id] ?? "—"}
+              </td>
               <td className="px-3 py-2 text-muted-foreground">{fmtDate(o.last_sign_in_at)}</td>
               <td className="px-3 py-2 text-muted-foreground">{fmtDate(o.created_at)}</td>
               <td className="px-3 py-2">
