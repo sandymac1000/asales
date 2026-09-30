@@ -451,22 +451,47 @@ KEY TERMINOLOGY: SRO, GMPP, Gateway review, GDS, service standard, G-Cloud, Crow
   },
 };
 
+// Matching a keyword anywhere inside a word is how "mod" (Ministry of Defence)
+// used to match "models", "erp" matched "enterprises" and "pra" (Prudential
+// Regulation Authority) matched "practices" — so an AI company describing
+// itself in perfectly ordinary English was handed a confidently wrong
+// playbook, silently, on every coaching turn. Match on word boundaries only.
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function countMatches(lower: string, keywords: string[]): number {
+  let score = 0;
+  for (const kw of keywords) {
+    const re = new RegExp(`\\b${escapeRegex(kw)}\\b`, "i");
+    if (!re.test(lower)) continue;
+    // A long, distinctive term ("aerospace", "airworthiness") is evidence on
+    // its own; a three-letter acronym is not. Requiring MIN_SCORE means one
+    // stray acronym can no longer select a playbook by itself.
+    score += kw.length >= 6 ? 2 : 1;
+  }
+  return score;
+}
+
+const MIN_SCORE = 2;
+
 export function detectVertical(text: string): Vertical | null {
   const lower = text.toLowerCase();
   let bestVertical: Vertical | null = null;
   let bestScore = 0;
 
   for (const [vertical, playbook] of Object.entries(PLAYBOOKS) as [Vertical, Playbook][]) {
-    const score = playbook.keywords.reduce((acc, kw) => {
-      return acc + (lower.includes(kw) ? 1 : 0);
-    }, 0);
+    const score = countMatches(lower, playbook.keywords);
     if (score > bestScore) {
       bestScore = score;
       bestVertical = vertical;
     }
   }
 
-  return bestScore > 0 ? bestVertical : null;
+  // Below the threshold we return null and the coach runs on its base prompt.
+  // No playbook is a better outcome than the wrong one: generic coaching that
+  // asks good questions beats specific coaching about the wrong industry.
+  return bestScore >= MIN_SCORE ? bestVertical : null;
 }
 
 export function getPlaybook(vertical: Vertical): string {
