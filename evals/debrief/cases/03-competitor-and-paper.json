@@ -1,0 +1,27 @@
+{
+  "id": "03-competitor-and-paper",
+  "tags": ["extraction", "medium"],
+  "note": "Two distinct signals in one call: a named competitor and a real paper process with a named blocker.",
+  "deal": {
+    "account_name": "Ardent Manufacturing",
+    "deal_name": "Line yield analytics",
+    "stage": "proposing",
+    "pain": "Scrap rate on line 3 runs at 4.1% against a 2% target.",
+    "success_criteria": "Hold scrap under 2.5% for a quarter.",
+    "economic_buyer_name": "Marta Lindqvist",
+    "economic_buyer_met": true,
+    "contacts": [
+      { "name": "Marta Lindqvist", "role": "economic_buyer" },
+      { "name": "Joe Bannerman", "role": "champion" }
+    ],
+    "meddpicc": { "meddpicc_metrics": "Scrap 4.1% vs 2% target." }
+  },
+  "transcript": "Joe: Fair warning, Marta asked the team to look at Siemens Opcenter as well. They've got an existing Teamcenter footprint so procurement likes the idea of one throat to choke.\nUs: Understood. Where are they in that evaluation?\nJoe: Early. No demo yet.\nUs: And on our side, what happens after Marta says yes?\nJoe: It goes to Ruth in procurement. She'll want the security questionnaire back, then legal do the MSA — that's typically six weeks with our lot, sometimes eight. Ruth is not obstructive, she's just got a queue.\nUs: So realistically signature is mid-March.\nJoe: If the questionnaire goes back this week, yes.",
+  "expect": {
+    "must_extract": ["meddpicc_competition", "meddpicc_paper_process"],
+    "may_extract": ["meddpicc_decision_process", "next_action"],
+    "must_not_extract": ["meddpicc_metrics"],
+    "expected_contacts": ["Ruth"],
+    "min_confidence_on_must": 0.7
+  }
+}

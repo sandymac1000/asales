@@ -1,0 +1,24 @@
+{
+  "id": "04-champion-not-champion",
+  "tags": ["judgement", "hard"],
+  "note": "The contact is enthusiastic but powerless — a fan, not a champion. The agent should not record him as a champion, and should not invent budget authority he never claimed.",
+  "deal": {
+    "account_name": "Vale Water",
+    "deal_name": "Network leakage analytics",
+    "stage": "exploring",
+    "pain": null,
+    "success_criteria": null,
+    "economic_buyer_name": null,
+    "economic_buyer_met": false,
+    "contacts": [{ "name": "Tom Reilly", "role": "influencer" }],
+    "meddpicc": {}
+  },
+  "transcript": "Tom: Honestly, I love this. I've been saying for two years we need something like it.\nUs: Who else needs to see it?\nTom: That's the tricky bit. I'm in the innovation team, so we don't hold an operational budget. It would have to come out of Asset Management.\nUs: Do you know who runs that?\nTom: There's a director, I think it's a woman called Sandra, but I've never met her. I could try to find out.\nUs: What normally happens to ideas like this?\nTom: Usually they go into the innovation portfolio and get reviewed in the autumn. Some get funded.",
+  "expect": {
+    "must_extract": [],
+    "may_extract": ["meddpicc_decision_process", "next_action", "meddpicc_eb_notes"],
+    "must_not_extract": ["meddpicc_champion_notes", "meddpicc_metrics", "pain"],
+    "expected_contacts": ["Sandra"],
+    "max_updates": 3
+  }
+}

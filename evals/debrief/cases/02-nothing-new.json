@@ -1,0 +1,28 @@
+{
+  "id": "02-nothing-new",
+  "tags": ["restraint", "hard"],
+  "note": "Negative case. A friendly call with no new qualification information. Over-extraction here is the real failure mode, since debrief output gets written into deal records.",
+  "deal": {
+    "account_name": "Caldera Bioscience",
+    "deal_name": "Lab data platform",
+    "stage": "exploring",
+    "pain": "Sample tracking is manual and error-prone.",
+    "success_criteria": "Cut sample re-runs.",
+    "economic_buyer_name": null,
+    "economic_buyer_met": false,
+    "contacts": [{ "name": "Dr Helen Mbeki", "role": "influencer" }],
+    "meddpicc": { "meddpicc_pain_notes": "Manual sample tracking causes re-runs." }
+  },
+  "transcript": "Helen: Sorry, I've only got ten minutes — the instrument booking ran over.\nUs: No problem. Did you get a chance to look at the summary I sent?\nHelen: I skimmed it. It looks sensible. I'd want to see it running against our own data before I could say much more.\nUs: Happy to arrange that. Anyone else you'd want in the room?\nHelen: Let me think about that. Things are a bit unsettled here at the moment. Can we pick it up after the holidays?\nUs: Of course. I'll send something over in January.",
+  "expect": {
+    "must_extract": [],
+    "may_extract": ["next_action"],
+    "must_not_extract": [
+      "meddpicc_metrics", "meddpicc_eb_notes", "meddpicc_champion_notes",
+      "meddpicc_decision_criteria", "meddpicc_decision_process",
+      "meddpicc_paper_process", "meddpicc_competition", "pain", "success_criteria"
+    ],
+    "expected_contacts": [],
+    "max_updates": 1
+  }
+}

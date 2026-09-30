@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { result, usage } = await runDebriefAgent(anthropic, deal, transcript, debriefModel);
+    const { result, usage, model } = await runDebriefAgent(anthropic, deal, transcript, debriefModel);
 
     await recordUsage({
       organizationId: orgId, userId: user.id, agent: "debrief",
-      model: debriefModel, usage, dealId: deal_id,
+      model: model ?? debriefModel, usage, dealId: deal_id,
     });
 
     return NextResponse.json(result);

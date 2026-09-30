@@ -1,0 +1,24 @@
+{
+  "id": "01-explicit-metrics",
+  "tags": ["extraction", "easy"],
+  "note": "Everything is said out loud, with numbers. The agent should catch the metric and the pain, and should be confident.",
+  "deal": {
+    "account_name": "Northwind Rail",
+    "deal_name": "Depot condition monitoring",
+    "stage": "qualifying",
+    "pain": null,
+    "success_criteria": null,
+    "economic_buyer_name": null,
+    "economic_buyer_met": false,
+    "contacts": [{ "name": "Priya Raghavan", "role": "champion" }],
+    "meddpicc": {}
+  },
+  "transcript": "Priya: We pulled the numbers before this call. Last financial year we had 61 unplanned withdrawals across the three depots. Our finance team costs each one at about £40,000 once you include replacement stock and the penalty payments to the franchise. So call it £2.4 million a year.\nUs: And what would good look like?\nPriya: If we cut that by a third in the first year I'd consider it a success. Alan would too — he signs off anything over £50k and he's the Engineering Director, he owns the availability target.\nUs: Have you got a date you're working to?\nPriya: The franchise review is in April, so anything that improves availability needs to be live before then.",
+  "expect": {
+    "must_extract": ["meddpicc_metrics", "pain"],
+    "may_extract": ["success_criteria", "meddpicc_eb_notes", "meddpicc_decision_process", "next_action"],
+    "must_not_extract": ["meddpicc_competition", "meddpicc_paper_process"],
+    "expected_contacts": ["Alan"],
+    "min_confidence_on_must": 0.7
+  }
+}

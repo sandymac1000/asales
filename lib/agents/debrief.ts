@@ -162,7 +162,7 @@ export async function runDebriefAgent(
   deal: DealFull,
   transcript: string,
   model: string = DEFAULT_MODELS.debrief,
-): Promise<{ result: DebriefResult; usage: Anthropic.Usage }> {
+): Promise<{ result: DebriefResult; usage: Anthropic.Usage; model: string }> {
   // Adaptive thinking is supported across the current Opus and Sonnet
   // generations, so this no longer needs to be Opus-gated. Older models that
   // predate it would reject the parameter, so keep the guard for an org that
@@ -192,6 +192,9 @@ export async function runDebriefAgent(
   }
 
   return {
+    // The served model, not the requested one: a silent provider substitution
+    // would otherwise invalidate any comparison built on these numbers.
+    model: response.model,
     result: gateByConfidence(toolUse.input as DebriefResult),
     usage: response.usage,
   };
