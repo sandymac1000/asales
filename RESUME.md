@@ -6,32 +6,36 @@ Snapshot for picking work back up.
 
 ---
 
-## READ THIS FIRST — two things are pending
+## Status on 2026-09-30 — everything is applied, pushed and verified live
 
-**1. Migrations 019 and 020 are NOT applied.** Five commits sit unpushed on
-`main` that expect them. Verified remote state on 2026-09-30: `admin_org_usage`
-exists (018 applied); `admin_signups_daily`, `admin_logins_daily`,
-`agent_usage` and `deals.is_demo` are all absent. Clean slate, no collisions.
+Migrations **019 and 020 are applied** to the production Supabase project, all
+five commits are **pushed**, Vercel has deployed, and the features were checked
+in the live app:
 
-Apply **019 first, then 020**, by pasting into the Supabase SQL editor.
-`supabase db query --linked -f <file>` is the CLI equivalent but is **blocked by
-the Claude Code auto-mode classifier as a production deploy** — either paste by
-hand or add a Bash permission rule. Do **not** use `supabase db push`: the
-remote migration history has no record of 001–018 (applied by hand), so a push
-may try to re-run everything.
+- `/start` renders and reads production correctly (all four steps green for
+  Sandymac, demo door offered)
+- `/admin` adoption chart draws real data — cumulative members 1→5, deals 3→4,
+  weekly from 29 Jun to 20 Jul
+- Settings → AI access shows the spend panel ("$0.00 across 0 agent calls",
+  correct — metering only starts counting now) and the key-capping guidance
+- Verified in the DB: all four 019 views + `admin_org_spend`, `agent_usage`
+  with RLS on and exactly one SELECT policy, `is_demo` on `deals` and
+  `accounts`, `demo_seeded_at` on `organizations`, no `anon`/`authenticated`
+  grants on any admin view, and `admin_org_usage` unchanged in shape (9 orgs)
 
-**2. The push is deliberately held.** `main` is 5 commits ahead of `origin/main`
-and Vercel auto-deploys from `main`, so pushing before the migrations are in
-means the beta briefly runs code whose schema is missing. It degrades
-gracefully (see below) but the intended order is migrations → verify → push.
+### One thing that will never work on this project
+`auth.audit_log_entries` is **completely empty — 0 rows**. Supabase has pruned
+it, so the **Sign-in frequency chart will always show "No sign-ins in the
+retained auth log"**. The Login recency chart is unaffected (it reads
+`auth.users.last_sign_in_at`) and does have data. To get real sign-in history
+we need our own table written on successful `verifyOtp` — it would only accrue
+from the day it ships. Decide whether to build that or drop the chart.
 
-Unpushed commits, oldest first:
-- `c88d232` Operator console: adoption and login-frequency charts (migration 019)
-- `3bbb8aa` Agents: current models, ceilings, caching, metering, confidence gate (migration 020)
-- `b921253` Get-started sequence and demo mode
-- `237433b` Eval harness for the debrief agent
-
-(`d7115a0`, the login fixes, is already pushed and live.)
+### How the migrations were applied
+`supabase db query --linked -f <file>` worked. An earlier attempt was blocked
+by the auto-mode classifier as a production deploy; on retry with the user's
+explicit go-ahead it went through. Still never use `supabase db push` — the
+remote history has no record of 001–018.
 
 ---
 
@@ -59,7 +63,7 @@ can actually die instead of being replayed for ever.
 
 ---
 
-## What changed on 2026-09-30 (unpushed)
+## What shipped on 2026-09-30
 
 ### Agents
 - Models centralised in `lib/agents/models.ts` — one edit to upgrade, not five.
@@ -111,14 +115,6 @@ and whether to spend ~$0.05–0.20 on a paid smoke run.
 
 ---
 
-## Graceful degradation while 019/020 are unapplied
-- `/admin` → "Usage charts need migration 019", table still works
-- Settings → AI access → "metering isn't switched on yet"
-- Demo seeding → 503 naming the migration
-- `/start` → renders; deal count reads 0
-
----
-
 ## DNS — one real fault outstanding
 `_dmarc.sandymac1000.com` returns **two** TXT records. RFC 7489 says a receiver
 finding more than one must ignore DMARC entirely, so the domain has no
@@ -144,22 +140,21 @@ Verified on both 1.1.1.1 and 8.8.8.8.
 ---
 
 ## Next, in the order I'd take them
-1. Apply 019 then 020; push the 5 commits
-2. Delete/protect the stale Vercel deployment; fix the duplicate DMARC record
-3. Grow the eval set to ~20 cases, then run it
-4. **Shared org brief** — extract product narrative + segments + ICP + targets
+1. Delete/protect the stale Vercel deployment; fix the duplicate DMARC record
+2. Grow the eval set to ~20 cases, then run it
+3. **Shared org brief** — extract product narrative + segments + ICP + targets
    into one cached block all agents read. Fixes the caching-below-threshold
    problem and is the prerequisite for the two new roles.
-5. **Pipeline agent** (portfolio-level: where the quarter breaks, coverage,
+4. **Pipeline agent** (portfolio-level: where the quarter breaks, coverage,
    deals with no economic buyer) and **follow-through agent** (nothing
    currently notices every next action is overdue)
-6. Debrief UI: per-item apply. Confidence is colour-coded in
+5. Debrief UI: per-item apply. Confidence is colour-coded in
    `deal-detail-client.tsx` but "Apply updates" still applies all or nothing
 
 ---
 
 ## Branch state
-- `main` — 5 commits ahead of origin, unpushed
+- `main` — pushed and deployed, clean
 - `book-updates` — 3 commits not in main, deliberately separate
 - `code-signin`, `market-segments`, `operator-console`, `server-supervision`,
   `vercel-multiorg-deploy` — all fully merged into main, safe to delete
