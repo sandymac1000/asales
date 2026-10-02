@@ -65,14 +65,38 @@ remote history has no record of 001–018.
 - **Sending domain:** `sandymac1000.com` via Resend
 - **Guides in repo:** `OPERATOR.md`, `DEPLOY.md`
 
+### Custom domain + deployment protection (2026-10-02)
+`app.sandymac1000.com` is the production custom domain — CNAME to
+`01ec983c45b4779a.vercel-dns-017.com`, Cloudflare **DNS only** (proxying
+breaks certificate issuance), Let's Encrypt cert valid.
+
+**Deployment Protection is ON, Standard scope.** Verified behaviour:
+- `app.sandymac1000.com` — public
+- `salientbeta.vercel.app` — **also still public**; Vercel exempts the
+  project's primary `.vercel.app` domain as well as custom ones, so no
+  existing beta user was stranded
+- `salientbeta-<hash>-…vercel.app` — **walled**, redirects to `vercel.com/login`
+
+That closes the stale-deployment problem permanently, including for future
+deployments. Previously every push minted another permanent public URL, and
+all the pre-`64b6447` ones served the dead magic-link build.
+
+`NEXT_PUBLIC_APP_URL` now points at the custom domain. Note it had to be
+**deleted and recreated as Config**: Vercel rejects a `NEXT_PUBLIC_*` variable
+stored as Secret, and a saved Secret cannot be converted (the radio is
+disabled). Scope is Production + Preview, and the project was redeployed so
+the value compiles in.
+
+**Unverified:** the only consumer of that variable is the invite email, so
+confirming it end to end means provisioning a throwaway org and reading the
+link. Not done.
+
 ### Login was broken on 2026-09-30 — root cause, for the record
 Not email, not Supabase. Sandy was on a **pinned old deployment URL**
 (`salientbeta-7tgdxu7cc-…vercel.app`) whose build predates the code sign-in
 work, so it asked for a magic link while the Supabase templates had been
 rewritten to send `{{ .Token }}` only — a code with no link, and a page with
-nowhere to type it. Fixed by using the production alias. **That old deployment
-is still publicly reachable and will bite again — delete or password-protect
-it in Vercel.**
+nowhere to type it. Fixed by using the production alias. (That deployment is now walled off by Deployment Protection — see above.)
 
 Shipped alongside (commit `d7115a0`, live): real GoTrue error messages instead
 of "Something went wrong"; `shouldCreateUser` gated on an invite code so typos
@@ -134,13 +158,22 @@ and whether to spend ~$0.05–0.20 on a paid smoke run.
 
 ---
 
-## DNS — one real fault outstanding
-`_dmarc.sandymac1000.com` returns **two** TXT records. RFC 7489 says a receiver
-finding more than one must ignore DMARC entirely, so the domain has no
-effective policy despite looking configured. **Delete the one containing
-`rua=mailto:me@sandymac1000.com`** and keep the bare `"v=DMARC1; p=none;"` —
-the apex has no MX, so that rua address cannot receive the reports anyway.
-Verified on both 1.1.1.1 and 8.8.8.8.
+## DNS — DMARC fixed 2026-09-30
+`_dmarc.sandymac1000.com` had **two** TXT records, and RFC 7489 says a receiver
+finding more than one must ignore DMARC entirely — so the domain had no
+effective policy despite looking configured. The record carrying
+`rua=mailto:me@sandymac1000.com` was deleted (the apex has no MX, so those
+reports went nowhere anyway), leaving exactly one: `"v=DMARC1; p=none;"`.
+Verified on 1.1.1.1 and 8.8.8.8. Resend's sending path was checked intact
+afterwards: `send.` MX to Amazon SES, SPF, and `resend._domainkey` DKIM.
+
+### Still open: two mail providers on this domain
+Four records still vouch for **SendGrid** — `em2466` CNAME, `s1._domainkey`,
+`s2._domainkey`, and `mail.` MX to `mx.sendgrid.net` — while Salient sends via
+**Resend**. If nothing else uses SendGrid these are dead weight and a lapsed
+provider still authorised to speak for the domain. Confirm before removing.
+
+Note `app.sandymac1000.com` now also exists (CNAME to Vercel, DNS only).
 
 ---
 
@@ -159,12 +192,10 @@ Verified on both 1.1.1.1 and 8.8.8.8.
 ---
 
 ## Next, in the order I'd take them
-1. **Fill in account industries** — 0 of 3 accounts have `industry` set, so the
-   coach's new per-deal tuning falls back to the weakest signal. Cheapest
-   quality win available.
-2. Delete/protect the stale Vercel deployment (`salientbeta-7tgdxu7cc-…`);
-   fix the duplicate DMARC record in Cloudflare
-3. Read the new Software & Technology playbook in
+1. **Fill in account industries** — 0 of 3 accounts (ACME inc, Deutsche Bank,
+   Twin Path) have `industry` set, so the coach's per-deal tuning falls back to
+   the weakest signal. Cheapest quality win available.
+2. Read the new Software & Technology playbook in
    `lib/agents/domain-playbooks.ts` — ~1,000 words of domain opinion in the
    vertical Sandy knows best, written by Claude and not yet human-reviewed
 4. Grow the debrief eval set to ~20 cases, then run it. Three sign-offs are
@@ -178,7 +209,7 @@ Verified on both 1.1.1.1 and 8.8.8.8.
    currently notices every next action is overdue)
 7. Debrief UI: per-item apply. Confidence is colour-coded in
    `deal-detail-client.tsx` but "Apply updates" still applies all or nothing
-8. Decide on sign-in history: own table written at `verifyOtp`, or drop the
+7. Decide on sign-in history: own table written at `verifyOtp`, or drop the
    Sign-in frequency chart (the auth log is permanently empty)
 
 ### Deliberately not built, with reasons
