@@ -48,7 +48,7 @@ sign-in page. The code is also shown in that org's **Settings → Team**.
 | `KEY_ENCRYPTION_SECRET` | a long random string (stable — see below) |
 | `RESEND_API_KEY` | from resend.com |
 | `FEEDBACK_EMAIL` | where feedback emails go (your inbox) |
-| `NEXT_PUBLIC_APP_URL` | the Vercel URL |
+| `NEXT_PUBLIC_APP_URL` | the public app URL — `https://app.sandymac1000.com`. Must be the **custom domain**, not a generated `*.vercel.app` one: it is what invite emails tell people to visit, and generated URLs get walled off by Deployment Protection |
 | `ADMIN_EMAILS` | comma-separated operator emails (you only) — unlocks `/admin` |
 | `INVITE_FROM_EMAIL` | optional; verified Resend sender for external invite emails |
 

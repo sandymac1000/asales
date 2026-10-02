@@ -58,7 +58,9 @@ remote history has no record of 001–018.
 
 ## Salient beta — LIVE
 
-- **App:** https://salientbeta.vercel.app — production alias, always use this
+- **App:** https://app.sandymac1000.com — the custom production domain, always use this.
+  `salientbeta.vercel.app` still resolves but is a generated URL, so Standard
+  Protection will wall it off; treat it as deprecated.
 - **Operator console:** `/admin` (visible only to `ADMIN_EMAILS` = Sandy)
 - **Sending domain:** `sandymac1000.com` via Resend
 - **Guides in repo:** `OPERATOR.md`, `DEPLOY.md`

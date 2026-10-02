@@ -3,8 +3,8 @@
 How to run the Salient beta: onboard organisations, manage access, and handle the
 common snags. This is the day-to-day guide; `DEPLOY.md` covers the one-time infra setup.
 
-- **App URL:** https://salientbeta.vercel.app
-- **Operator console:** https://salientbeta.vercel.app/admin (the **Admin** item in the
+- **App URL:** https://app.sandymac1000.com
+- **Operator console:** https://app.sandymac1000.com/admin (the **Admin** item in the
   sidebar, visible only to you — gated by the `ADMIN_EMAILS` environment variable)
 - **Sending domain:** `sandymac1000.com` (sign-in and invite emails come from here via Resend)
 
@@ -28,7 +28,7 @@ never their deal contents or keys.
 
 ## What the new person does
 
-1. Go to https://salientbeta.vercel.app, enter their email and the invite code (first time
+1. Go to https://app.sandymac1000.com, enter their email and the invite code (first time
    only), click *Email me a sign-in code*.
 2. They receive an 8-digit **code** (not a link) from `noreply@sandymac1000.com`. They type it
    in. No password, no link.
@@ -37,6 +37,16 @@ never their deal contents or keys.
    (from console.anthropic.com). The agents stay off until they do this. It's their key, their
    bill.
 5. **To bring colleagues in:** Settings → Team shows their org's code to share.
+
+## If the app URL ever changes
+
+The invite email builds its link from the `NEXT_PUBLIC_APP_URL` environment
+variable in Vercel — it is not hardcoded. So changing the address people are
+sent to is one env-var edit plus a redeploy, not a code change.
+
+It must point at the **custom domain**. Vercel's Deployment Protection exempts
+production *custom* domains only, so a generated `*.vercel.app` address there
+would send invitees at a URL that is about to require a Vercel login.
 
 ## Deliverability — the one thing to tell every invitee
 
