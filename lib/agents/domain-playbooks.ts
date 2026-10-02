@@ -72,6 +72,13 @@ CULTURAL NORMS:
 - Security clearance or equivalent may be required for sensitive programmes
 - Decisions take time; short-term pressure tactics backfire
 
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: one-way NDA (usually in the prime's favour), export control / ITAR annexes, DEF STAN and AS9100 flow-downs, a Long Term Agreement with call-off Statements of Work tied to programme milestones
+- Fought over: ownership of foreground IP developed under programme funding, Crown or Government march-in rights, liability where anything touches airworthiness, data rights over test results, who carries export-control responsibility
+- Cheap to concede: escrow, restricting field of use to a named platform or programme (you were not serving the others anyway), territory limits that export control already imposes
+- Expensive, however it is dressed: any liability tied to airworthiness or flight safety, and foreground IP that silently absorbs your background IP
+- The trap: primes flow down the terms they accepted from the MoD or DoD. You can find yourself signing government terms without ever having negotiated with a government. Schedule your background IP explicitly or it will be treated as foreground.
+
 KEY TERMINOLOGY: AOG, MRO, digital thread, PLM, PDM, configuration management, airworthiness, DO-178C, DO-254, EASA, FAA, ITAR, DTIB, Cyber Essentials, CMMC, programme manager, chief engineer, design authority, AS9100`,
   },
 
@@ -124,6 +131,13 @@ REAL COMPETITION:
 - SAS and R for statistical analysis (deeply embedded, hard to displace)
 - Internal bioinformatics teams (especially at top-10 pharma)
 - Do-nothing / spreadsheet-based data management
+
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: mutual NDA (time-limited, typically three to five years), Material Transfer Agreement, Quality Agreement covering GxP responsibilities, MSA with Work Orders, DPA, and for anything licensed a full agreement with milestones and royalties
+- Fought over: ownership of results and improvements, publication rights, field of use by indication, territory, the milestone and royalty structure, audit rights, data ownership and the provenance of patient consent, and who bears the cost of IQ/OQ/PQ validation
+- Cheap to concede: publication rights to an academic partner, validation support (which is usually chargeable work rather than a giveaway), audit rights you would pass anyway
+- Expensive, however it is dressed: field of use narrowed to a single indication, which looks modest and removes most of your market; any assignment of improvements
+- The trap: an MTA signed early, before anyone knows what the material will produce, can assign rights to results you have not yet imagined. Read it as a licensing agreement, because that is what it becomes.
 
 KEY TERMINOLOGY: GxP, GMP, GCP, GLP, IQ/OQ/PQ, 21 CFR Part 11, Annex 11, audit trail, validated system, CTMS, EDC, LIMS, regulatory submission, NDA, BLA, MAA, clinical data management, protocol deviation, site activation, pharmacovigilance, IDMC, DSMB`,
   },
@@ -180,6 +194,13 @@ REAL COMPETITION:
 - Internal quant/engineering teams (especially Tier 1 banks)
 - Do-nothing: regulatory pressure sometimes forces action, but "wait and see" is common until a breach occurs
 
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: MSA, DPA, a regulatory outsourcing schedule (EBA guidelines, PRA SS2/21 operational resilience), a documented exit plan, security schedule, business continuity and testing obligations
+- Fought over: the regulator's right of access and audit, step-in rights, exit and transition assistance, data residency, sub-processor change control, liability for a data breach, and service credits
+- Cheap to concede: regulator audit and access rights, which are not actually yours to refuse; transition assistance, which is chargeable; reporting and evidence obligations you already produce
+- Expensive, however it is dressed: uncapped breach liability, data residency that forces new infrastructure, and step-in rights drafted broadly enough to hand over your systems
+- The trap: if the engagement is classified as material outsourcing, a far heavier contractual regime applies. It is sometimes possible to scope the work so it is not — and that conversation is worth having before the paperwork starts, not after.
+
 KEY TERMINOLOGY: cost-to-income ratio, T+2 settlement, straight-through processing (STP), model risk, operational risk, regulatory capital, ICAAP, ILAAP, SREP, FCA/PRA, DORA, Basel IV, Solvency II, AML/KYC, RWA, NPA, Sharpe ratio, VAR, stress testing, conduct risk`,
   },
 
@@ -234,6 +255,13 @@ REAL COMPETITION:
 - Internal digital engineering teams (especially at BP, Shell, National Grid)
 - McKinsey/Accenture-led transformation programmes that wrap commodity tools
 
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: framework agreement with call-offs, often an NEC or FIDIC form inherited from capital projects, HSE annexes, OT and ICS security schedules referencing IEC 62443, and long-term service agreements
+- Fought over: liquidated damages tied to availability, liability for operational disruption, cyber requirements reaching into operational technology, IP in site-specific configuration, change control, and retention or milestone-based payment
+- Cheap to concede: IP in site-specific configuration, extended support hours, evidence and reporting obligations
+- Expensive, however it is dressed: liquidated damages against availability, and any indemnity for consequential loss arising from an outage — a single incident can exceed the contract value many times over
+- The trap: contract forms designed for construction get applied to software, bringing retentions, milestone payments and defect liability periods with them. For a small vendor that is a cash-flow problem long before it is a legal one.
+
 KEY TERMINOLOGY: OEE, MTBF, MTTR, SCADA, EMS, DMS, ADMS, smart grid, predictive maintenance, condition monitoring, asset health index, RIIO-2, PR24, Ofgem, Ofwat, NIS Regulations, Management of Change, HAZOP, LOTO, net zero, scope 1/2/3, carbon intensity`,
   },
 
@@ -286,6 +314,13 @@ REAL COMPETITION:
 - Established NHS analytics platforms: Civica, Allocate, NHS Benchmarking Network, IQVIA for real-world evidence
 - Microsoft (Azure Health Data Services) and AWS (HealthLake) as cloud infrastructure bids
 - "Digital aspirant" consultancy-led projects (Optum, Deloitte) that wrap commodity tools
+
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: the NHS Standard Contract or a provider's equivalent, DPA, Data Security and Protection Toolkit submission, DTAC assessment, a clinical safety case under DCB0129 with the Trust's own under DCB0160, information governance schedules, and often a G-Cloud call-off
+- Fought over: who carries clinical safety responsibility, controller versus processor status, interoperability obligations, exit and data portability, and liability for clinical harm
+- Cheap to concede: data portability and exit assistance, interoperability commitments you intended to build anyway, transparency over incident reporting
+- Expensive, however it is dressed: accepting the manufacturer role in the clinical safety case without the resource to discharge it, and liability for clinical decisions taken by clinicians using your output
+- The trap: DTAC and DSPT are entry tickets, not bargaining chips — begin them before the deal needs them. Clinical safety duties under DCB0129 cannot be contracted away, whatever the contract says.
 
 KEY TERMINOLOGY: RTT, QIPP, CQUIN, EPR, CCIO, SIRO, Caldicott Guardian, DTAC, DCB0129, DCB0160, IG Toolkit, DSP Toolkit, G-Cloud, NHS SBS, ICB, PCN, integrated care, Never Event, Serious Incident, bed utilisation, discharge pathway`,
   },
@@ -340,6 +375,13 @@ REAL COMPETITION:
 - OSIsoft/AVEVA PI for historian and process data
 - Internal Industry 4.0 teams at large manufacturers
 
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: the customer's standard purchase order terms (which frequently override whatever you sent), a supply agreement, a quality agreement under IATF 16949 or ISO 9001, tooling and equipment ownership terms, and an NDA
+- Fought over: liability for line stoppage, warranty duration, spare parts and support commitments, IP in process improvements, and annual price-down clauses
+- Cheap to concede: extended warranty, longer support commitments, IP in improvements specific to their line
+- Expensive, however it is dressed: liability for production stoppage, and annual cost-reduction clauses, which look reasonable at signature and remove your margin a percentage point at a time over five years
+- The trap: the battle of the forms. Ship against their purchase order without countering and their terms govern, no matter what your MSA says. Settle which document rules before the first delivery, not after the first dispute.
+
 KEY TERMINOLOGY: OEE, MTBF, MTTR, MES, SCADA, PLC, historian, predictive maintenance, condition monitoring, ppm defect rate, IATF 16949, ISO 9001, andon, kaizen, SMED, changeover, yield, scrap, throughput, Industry 4.0, IIoT, digital twin`,
   },
 
@@ -391,6 +433,13 @@ REAL COMPETITION:
 - Open-source: Onfido alternatives, custom ML models on Hugging Face, internal data science teams
 - Category specialists: Sardine/Feedzai (fraud), Onfido/Sumsub (KYC), ComplyAdvantage (AML)
 - Incumbent banking platforms: Temenos, Thought Machine (for core banking challengers)
+
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: MSA, DPA, PCI DSS attestation where card data is in scope, SOC 2 Type II, a regulated-entity outsourcing schedule if the customer is authorised, partner or API agreements, and increasingly an AI-use addendum
+- Fought over: the liability cap and what it is a multiple of, allocation of fraud losses, uptime commitments with real service credits, data residency, sub-processor control, and who absorbs the cost of regulatory change
+- Cheap to concede: service credits capped at fees paid, evidence and attestation obligations, notice periods on sub-processor changes
+- Expensive, however it is dressed: fraud loss allocation, and liability caps expressed as a multiple of fees when the transaction values flowing through you dwarf those fees
+- The trap: a cap of twelve months fees sounds conventional and is meaningless if you process a hundred times that in value. Argue the cap against exposure, not against revenue.
 
 KEY TERMINOLOGY: API-first, SLA/uptime, deployment frequency, KYC/AML, false positive rate, chargeback rate, NPS, conversion rate, Consumer Duty, DORA, PSD2/PSD3, FCA authorisation, e-money institution, payment institution, scheme rules, ISO 20022, open banking`,
   },
@@ -447,6 +496,13 @@ REAL COMPETITION:
 - Established GovTech vendors: Civica, NEC, Socitm, Arcus (local government)
 - In-house digital teams (HMRC, DWP, GDS-influenced departments have strong internal teams)
 - Do-nothing: civil service inertia is a real competitive force; "we've always done it this way" combined with risk aversion
+
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: framework terms (G-Cloud, Crown Commercial, Digital Outcomes), a call-off contract, the Model Services Contract on larger engagements, security clauses referencing Cyber Essentials Plus and Government Security Classifications, transparency and FOI obligations, and social value commitments
+- Fought over: very little. Framework terms are largely fixed, which is the single most important fact in this section
+- Cheap to concede: transparency and FOI obligations, publication of contract value, social value commitments you can genuinely meet
+- Expensive, however it is dressed: IP ownership, where the default position often favours the Crown, and benchmarking or most-favoured-customer clauses that follow you into every other deal
+- The trap: this is the one vertical where concession trading does not work. The terms are set before you arrive, and attempting to ladder them marks you as someone who has not bought through a framework before. Spend your effort on scope, on exit, and on IP — the only places with genuine movement.
 
 KEY TERMINOLOGY: SRO, GMPP, Gateway review, GDS, service standard, G-Cloud, Crown Commercial, NAO, PAC, Spending Review, CDDO, digital spending controls, HMT Green Book, OJEU threshold, Cyber Essentials, Government Security Classifications, OFFICIAL-SENSITIVE, UK sovereign cloud, agile delivery, alpha/beta/live`,
   },
@@ -512,6 +568,13 @@ CULTURAL NORMS:
 - Documentation and a self-serve trial are part of the sale: buyers evaluate before they talk to you, and a gated demo loses deals you never hear about
 - Reference customers with a recognisable engineering reputation outweigh larger logos
 - Do not oversell AI capability to an audience that builds it. They will test the boundary immediately, and a caught exaggeration ends the deal
+
+CONTRACTUAL SURFACE — what you will actually be asked to sign:
+- Documents: MSA with an order form, DPA with standard contractual clauses, a sub-processor list, SOC 2 Type II report, their security questionnaire, an AI-use addendum, and a BAA if any health data is involved
+- Fought over: the liability cap and its multiple, IP in integrations built specifically for them, source code escrow, most-favoured-customer and benchmarking clauses, termination for convenience, data deletion and portability, and whether you may train models on their data
+- Cheap to concede: escrow, data portability, a contractual commitment never to train on their data (costs nothing if you were not going to, and is worth a great deal to them right now), longer notice periods
+- Expensive, however it is dressed: most-favoured-customer clauses, which price every future deal; termination for convenience at short notice, which removes any forecast you might build; and assignment rather than licence of foreground IP
+- The trap: model training rights are the new battleground and the clause is often buried in the AI addendum rather than the MSA. Decide your position before a buyer drafts it for you.
 
 KEY TERMINOLOGY: SOC 2 Type II, ISO 27001, DPA, sub-processor, pen test, SSO, SAML, SCIM, RBAC, audit log, SLA, SLO, p99 latency, throughput, tokens per second, inference cost, cost per request, self-hosted, VPC deployment, air-gapped, multi-tenant, single-tenant, land-and-expand, net revenue retention, design partner, POC, build-vs-buy, platform team, developer experience, toil, on-call, bus factor`,
   },
